@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.css'
+import { 
+  BrowserRouter, 
+  Navigate, 
+  Route, 
+  Routes, 
+  useNavigate
+} from 'react-router-dom'
+import GlobalStyles from './styles/global'
+import { useGlobalContext } from './context/global'
+
+//Pages
+import Dashboard from './pages/Dashboard'
+import Login from './pages/Login'
+import NotFound from './pages/NotFound'
+import ProtectedRoutes from './components/ProtectRoutes'
+import ChooseCln from './pages/ChooseCleaner'
+import ProtectedRoute from './components/protectedRoute'
 
 function App() {
+  const { global } = useGlobalContext()
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <BrowserRouter>
+      <GlobalStyles />
+      <Routes>
+        <Route element={ <ProtectedRoutes global={ global } /> }>
+          <Route path='' element={ <Dashboard /> } />
+        </Route>
+        <Route path='choose_cleaner' element={ 
+          <ProtectedRoute token={ global.token }>
+            <ChooseCln /> 
+          </ProtectedRoute>
+        }/>
+        <Route path='login' element={ <Login /> } />
+        <Route path='*' element={ <NotFound /> } />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App
