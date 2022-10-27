@@ -82,13 +82,10 @@ const ChooseCln: React.FC<{}> = () => {
                 .get<CleanerI[]>('/cleanerPro/attached_cleaners')
                 .then(res => res.data)
 
-
-            console.log('clns: ', clns)
             setCleaners(clns)
         } catch {
             setCleaners([])
         }
-            
     }
 
     useEffect(() => {

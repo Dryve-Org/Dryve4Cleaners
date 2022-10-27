@@ -36,8 +36,9 @@ const Dashboard = () => {
             <ActiveOrdersSide 
                 onOrderPress={ retreiveOrder }
             />
-            { chosenOdr && <OrderDetails 
+            { <OrderDetails 
                 order={ chosenOdr }
+                back={ () => setChosenOdr(undefined) }
             /> }
         </DashboardS>
     )

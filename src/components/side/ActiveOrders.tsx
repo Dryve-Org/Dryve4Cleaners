@@ -3,16 +3,17 @@ import styled from 'styled-components'
 import { retreivActiveOrder } from '../../constants/request'
 import { useGlobalContext } from '../../context/global'
 import { OrderI } from '../../interface/api'
+import { colors } from '../../styles/colors'
 import { device } from '../../styles/viewport'
 
 const ActiveOrdersS = styled.section`
     @media ${ device.desktop } {
         display: flex;
         flex-direction: column;
-        width: 25%;
-        max-width: 300px;
+        width: 35%;
+        max-width: 400px;
         height: 100vh;
-        background-color: blue;
+        background-color: ${ colors.black };
         /* overflow: hidden; */
     }
 `
@@ -24,7 +25,7 @@ const HeadS = styled.div`
 const HeadTxtS = styled.h3`
     text-align: center;
     font-size: 30px;
-    color: white;
+    color: ${ colors.orange };
 `
 
 const CardsCtnS = styled.section`
@@ -34,12 +35,13 @@ const CardsCtnS = styled.section`
     flex-direction: column;
     gap: 1em;
     height: 100%;
-    padding: 10px 0px;
-    margin: 0 10%;
+    padding: 5px 0px;
+    margin: 0 0%;
     overflow: scroll;
+    overflow-x: hidden;
     border-radius: 5px;
     @media ${ device.desktop } {
-        margin: 0px 10px
+        padding: 0px 10px
     }
 `
 
@@ -51,7 +53,7 @@ const CardS = styled.div`
     text-align: center;
     font-weight: 500;
     padding: 15px 0;
-    border: 1px solid black;
+    border: 3px solid ${ colors.orange };
 
     &:hover {
         background-color: beige;

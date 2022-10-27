@@ -90,6 +90,12 @@ export const orderStatuses = [
     "Complete"
 ]
 
+export type desiredService = {
+    quantity: number
+    service: ServiceI //stored prices of each service and change to string
+    _id: string
+}
+
 export interface OrderI {
     _id: string
     client: {
@@ -102,7 +108,7 @@ export interface OrderI {
     cleanerAddress: string
     driverLocation?: PointI
     // locationSession?: string //long and lat of clothes location
-    pickUpDriver?: {
+    pickUpDriver: {
         '_id': string
         user: {
             firstName: string
@@ -129,11 +135,8 @@ export interface OrderI {
     orderFee: number
     orderFeePaid: boolean
     userCard: string
-    isDropOff?: boolean //is order a drop off request
-    desiredServices?: {
-        quantity: number,
-        service: string //stored prices of each service and change to string
-    }[]
+    isDropOff: boolean //is order a drop off request
+    desiredServices: desiredService[]
     createdBy: {
         userType: string
         userTypeId: string
