@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
+import { useNavigate, useOutletContext, useParams } from "react-router-dom"
 import styled from "styled-components"
 import OrderDetails from "../components/mid/OrderDetails"
 import ActiveOrdersSide from "../components/side/ActiveOrders"
-import { api, getOrder, retreivActiveOrder } from "../constants/request"
+import { api, getOrder } from "../constants/request"
 import { useGlobalContext } from "../context/global"
 import { CleanerI, OrderI, orderStatuses } from "../interface/api"
 import { device } from "../styles/viewport"
@@ -15,20 +16,16 @@ const DashboardS = styled.section`
 `
 
 const Dashboard = () => {
-    const { global, setGlobal } = useGlobalContext()
-    const { token, cleanerId } = global
-    const [ chosenOdr, setChosenOdr ] = useState<OrderI>()
-
+    const [ chosenOdr, setChosenOdr ] = useState<OrderI['_id']>()
+    const params = useParams<{ orderId: string }>()
+    const nav = useNavigate()
+    
+    useEffect(() => {
+        setChosenOdr(params.orderId)
+    }, [ params ] )
+    
     const retreiveOrder = async (orderId: string) => {
-        try {
-            const order = await getOrder(token, orderId)
-            console.log('order: ', order)
-            if(order) {
-                setChosenOdr(order)
-            }
-        } catch {
-            //handle this at some point
-        }
+        nav(`${ orderId }`)
     }
 
     return(
@@ -36,10 +33,10 @@ const Dashboard = () => {
             <ActiveOrdersSide 
                 onOrderPress={ retreiveOrder }
             />
-            { <OrderDetails 
-                order={ chosenOdr }
-                back={ () => setChosenOdr(undefined) }
-            /> }
+            <OrderDetails 
+                orderId={ chosenOdr }
+                back={ () => nav('') }
+            />
         </DashboardS>
     )
 }

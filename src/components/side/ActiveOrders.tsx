@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
-import { retreivActiveOrder } from '../../constants/request'
+import { retreivActiveOrders } from '../../constants/request'
 import { useGlobalContext } from '../../context/global'
+import MainErrorHook from '../../hook/handleAuth'
 import { OrderI } from '../../interface/api'
 import { colors } from '../../styles/colors'
 import { device } from '../../styles/viewport'
+import { TokenAndClnOutletI } from '../TokenAndCln'
 
 const ActiveOrdersS = styled.section`
     @media ${ device.desktop } {
         display: flex;
         flex-direction: column;
         width: 35%;
-        max-width: 400px;
+        max-width: 300px;
         height: 100vh;
         background-color: ${ colors.black };
         /* overflow: hidden; */
@@ -96,11 +99,15 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
     onOrderPress
 }: ActiveOrdersSideI) => {
     const [ activeOrders, setActiveOrders ] = useState<OrderI[]>([])
-    const { global, setGlobal } = useGlobalContext()
-    const { token, cleanerId } = global
+    const { errorHandler } = MainErrorHook()
+
+    const {
+        token,
+        cleanerId
+    } = useOutletContext<TokenAndClnOutletI>()
 
     const getActiveOrders = async () => {
-        const aO = await retreivActiveOrder(token, cleanerId)
+        const aO = await retreivActiveOrders(token, cleanerId, errorHandler)
         if(!aO) return
         setActiveOrders(aO)
     } 

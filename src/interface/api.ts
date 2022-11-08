@@ -64,30 +64,32 @@ export type OrderstatusT = "Task Posted Pickup" |
     "Task Canceled" |
     "Pickup Driver On the Way" |
     "Dropoff Driver On the Way" |
-    "Pickup Driver approaching" |
-    "Dropoff Driver approaching" |
-    "Clothes to Cleaner" |
+    "Clothes To Cleaner" |
+    "Clothes Awaiting Pricing" |
     "Clothes Awaiting Clean" |
+    "Clothes Being Cleaned" |
     "Clothes Ready" |
     "Driver To Cleaner" |
     "Clothes to Home" |
-    "Complete"
+    "Complete" |
+    "Cancelled"
 
-export const orderStatuses = [
+export const orderStatuses: OrderstatusT[] = [
     "Task Posted Pickup",
     "Task Posted Dropoff",
-    "Picked Up From Cleaner",
     "Task Canceled",
     "Pickup Driver On the Way",
     "Dropoff Driver On the Way",
-    "Pickup Driver approaching",
-    "Dropoff Driver approaching",
-    "Clothes to Cleaner",
+    "Clothes To Cleaner",
+    "Clothes Awaiting Pricing",
     "Clothes Awaiting Clean",
+    "Clothes Being Cleaned",
     "Clothes Ready",
     "Driver To Cleaner",
+    "Picked Up From Cleaner",
     "Clothes to Home",
-    "Complete"
+    "Complete",
+    "Cancelled"
 ]
 
 export type desiredService = {
@@ -120,7 +122,7 @@ export interface OrderI {
     pickUpCostId?: string // cost for drive to Cleaners
     dropOffCostId?: string // cost for drive from Cleaner to origin
     cleanCostId?: string // total cost for cleaners
-    cleaner: string
+    cleaner: CleanerI
     orderClosed: boolean //is order accessible, useable, and still active
     clientPickupTime?: number
     cleanerDropOffTime?: number
@@ -131,6 +133,7 @@ export interface OrderI {
     toCleanerDistance: number // in miles
     fromCleanerDistance: number //in miles
     created: number
+    orderPaidfor: boolean
     status: OrderstatusT
     orderFee: number
     orderFeePaid: boolean

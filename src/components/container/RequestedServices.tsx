@@ -1,6 +1,8 @@
 import styled from 'styled-components'
 import { desiredService, OrderI, ServiceI } from '../../interface/api'
 import { colors } from '../../styles/colors'
+import { numToMoney } from '../../constants/money'
+import { device } from '../../styles/viewport'
 
 const SerivcesCtnS = styled.section`
     
@@ -17,16 +19,27 @@ const ServicesHeadTxtS = styled.h3`
 `
 
 const ServicesListS = styled.div`
-    margin: 10px 10%;
+    margin: 10px 0px;
+    display: flex;
+    overflow-y: auto;
+    gap: 1em;
+
+    @media ${ device.desktop } {
+        justify-content: center;
+    }
 `
 
 const CardS = styled.div`
-    background-color: lightblue;
+    background-color: ${ colors.offGold };
     width: 100%;
     padding: 10px;
     border-radius: 20px;
     text-align: center;
-    border: 2px black solid;
+    border: 2px solid ${ colors.offGold };
+    min-width: 200px;
+    max-width: 350px;
+    color: ${ colors.black };
+    margin-bottom: 1em;
 `
 
 const CardNameS = styled.p`
@@ -37,10 +50,11 @@ const CardNameS = styled.p`
 const CardQuantity = styled.p`
     font-size: 20px;
     font-weight: 500;
+    font-style: italic;
 `
-
-const CardPriceS = styled.p`
     
+const CardPriceS = styled.p`
+    font-weight: 500;
 `
 
 const SvcCard = ({
@@ -53,34 +67,42 @@ const SvcCard = ({
             <CardNameS>
                 { service.title }
             </CardNameS>
-            <CardQuantity>
-                { quantity }
-            </CardQuantity>
             <CardPriceS>
-                { service.price }
+                { numToMoney(service.price) }
             </CardPriceS>
+            <CardQuantity>
+                Quantity: { quantity }
+            </CardQuantity>
         </CardS>
     )
 }
 
-type servicesT = Pick<OrderI, 'desiredServices'>
+interface RequestedServicesI {
+    desiredServices: OrderI['desiredServices']
+    orderTotal: OrderI['orderTotal']
+    isUpdated: boolean
+}
 
-const RequestedServices: React.FC<servicesT> = ({
-    desiredServices
-}: servicesT) => {
+const RequestedServices: React.FC<RequestedServicesI> = ({
+    desiredServices,
+    orderTotal,
+    isUpdated
+}: RequestedServicesI) => {
+    orderTotal = orderTotal ? orderTotal : 0
 
     return (
         <SerivcesCtnS>
             <ServicesHeadS>
                 <ServicesHeadTxtS>
-                    Services
+                    Desired Services (Total: { numToMoney(orderTotal) }
+                    {isUpdated ? '*' : ''})
                 </ServicesHeadTxtS>
             </ServicesHeadS>
             <ServicesListS>
                 { desiredServices.map(svc => <SvcCard {...svc} />) }
             </ServicesListS>
         </SerivcesCtnS>
-)
+    )
 }
 
 export default RequestedServices

@@ -110,7 +110,7 @@ const Login = () => {
         await axios.post<GlobalI['token']>('/cleanerPro/login', values)
             .then(res => {
                 setGlobal({ ...global, token: res.data })
-                nav('/')
+                nav('/dashboard')
             })
             .catch(e => {
                 if(e.response.status === 401) {

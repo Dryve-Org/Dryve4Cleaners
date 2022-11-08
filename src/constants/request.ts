@@ -1,41 +1,166 @@
-import axios from 'axios'
-import { OrderI } from '../interface/api'
+import axios, { AxiosError } from 'axios'
+import { CleanerI, OrderI } from '../interface/api'
 
-export const api = (providedToken?: string) => {
-    return axios.create({
+/**
+ * This function returns an axios instance with a baseURL and a header with an Authorization key and a
+ * value of a Bearer token.
+ * @param {string} [providedToken] - The token that is provided to the function.
+ * @returns An axios instance with a baseURL of '/' and a header of "Authorization" with a value of
+ * "Bearer null"
+*/
+export const api = (providedToken?: string, errorHandler?: (e: any) => void ) => {
+    const theApi = axios.create({
         baseURL: '/',
         headers: {
             "Authorization": `Bearer ${ providedToken ? providedToken : 'null' }`,
         }
     })
+
+    theApi.interceptors.response.use((response) => response, (error) => {
+        console.log('error:', error)
+        if(axios.isAxiosError(error)) {
+            errorHandler && errorHandler(error)
+        }
+    })
+
+    return theApi
 }
 
-export const retreivActiveOrder = async (
+/**
+ * This function returns an array of objects of type OrderI or undefined.
+ * @param {string} token - string - the token that is used to authenticate the user
+ * @param {string} cleanerId - string
+ * @returns An array of Orders.
+*/
+export const retreivActiveOrders = async (
     token: string,
-    cleanerId: string
+    cleanerId: string,
+    errorHandler?: (e: any) => void
 ) => {
     try {
-        const activeOrders = await api(token)
+        const activeOrders = await api(token, errorHandler)
             .get<OrderI[]>(`/cleanerPro/active_orders/${ cleanerId }`)
             .then(res => res.data)
 
         return activeOrders
-    } catch {
+    } catch(e) {
+        console.log('it got here')
+        
         return undefined
     }
 } 
 
+/**
+ * It gets an order from the server, and if it fails, it returns undefined.
+ * @param {string} token - string - the token that is used to authenticate the user
+ * @param {string} orderId - string
+ * @returns An object of type OrderI
+ */
 export const getOrder = async (
     token: string,
-    orderId: string
+    orderId: string,
+    errorHandler?: (e: any) => void
 ) => {
     try {
         const orderData = await api(token)
             .get<OrderI>(`/cleanerPro/order/${ orderId }`)
             .then(res => res.data)
+            .catch(() => {
+                throw 'unable to get order'
+            })
         
         return orderData
-    } catch {
+    } catch(e) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+}
+
+export const getAttachedCleaners = async (
+    token: string,
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const cleaners = await api(token)
+        .get<CleanerI[]>('/cleanerPro/attached_cleaners')
+        .then(res => {
+            return res.data
+        })
+
+        return cleaners
+    } catch(e) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+
+}
+
+/**
+ * Getting services provide by the cleaner
+ * @param {string} token - string - the token that is used to authenticate the user
+ * @param {string} clnId - string - the cleaner id
+ * @returns An array of services
+ */
+export const getServices = async (
+    token: string,
+    clnId: string,
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const services = await api(token)
+            .get<CleanerI['services']>(`/cleanerPro/cleaner/${ clnId }/services`)
+            .then(res => res.data)
+        
+        return services
+    } catch(e) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+}
+
+export const UpdateServices = async (
+    token: string,
+    orderId: OrderI['_id'],
+    desiredServices: OrderI['desiredServices'],
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const formattedDS = desiredServices.map(ds => ({
+            service: ds.service._id,
+            quantity: ds.quantity
+        }))
+
+        const update = await api(token)
+            .put<OrderI>(
+                `/cleanerPro/order/${orderId}/update_services`,
+                {
+                    desiredServices: formattedDS
+                }
+            )
+            .then(res => res.data)
+
+        return update
+    } catch(e: any) {
+        errorHandler && errorHandler(e)
+        return e.data
+    }
+}
+
+export const clothesReady = async (
+    token: string,
+    orderId: string,
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const update = await api(token)
+            .put<OrderI>(
+                `/cleanerPro/order/${orderId}/clothes_ready`
+            )
+            .then(res => res.data)
+
+        return update
+    } catch(e: any) {
+        errorHandler && errorHandler(e)
         return undefined
     }
 }

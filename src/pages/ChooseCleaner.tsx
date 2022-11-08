@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { api } from '../constants/request'
+import { api, getAttachedCleaners } from '../constants/request'
 import { useGlobalContext } from '../context/global'
 import { CleanerI } from '../interface/api'
+import { Token } from '../interface/general'
+import { colors } from '../styles/colors'
 
 const ChooseClnS = styled.section`
 `
@@ -19,6 +21,7 @@ const HeaderCtnS = styled.div`
 const Header = styled.h2`
     text-align: center;
     font-size: 30px;
+    color: ${ colors.orange };
 `
 
 const CardsCtnS = styled.section`
@@ -70,26 +73,22 @@ const ClnCard: React.FC<{cln: CleanerI, action: Function}> = ({
     )
 }
 
-const ChooseCln: React.FC<{}> = () => {
+
+
+const ChooseCln: React.FC<{
+    token: Token
+}> = ({ token }) => {
     const nav = useNavigate()
     const [ cleaners, setCleaners ] = useState<CleanerI[]>([])
     const { global, setGlobal } = useGlobalContext()
-    const { token } = global
-
-    const retreiveCleaners = async () => {
-        try {
-            const clns = await api(token)
-                .get<CleanerI[]>('/cleanerPro/attached_cleaners')
-                .then(res => res.data)
-
-            setCleaners(clns)
-        } catch {
-            setCleaners([])
-        }
-    }
 
     useEffect(() => {
-        retreiveCleaners()
+        console.log('token', token)
+        getAttachedCleaners(token)
+            .then(res => {
+                if(!res) return
+                setCleaners(res)
+            })
     }, [])
 
     const selectCln = (id: string) => {
@@ -98,7 +97,19 @@ const ChooseCln: React.FC<{}> = () => {
             cleanerId: id
         })
 
-        nav('/')
+        nav('/dashboard')
+    }
+
+    if(!cleaners.length) {
+        return (
+            <ChooseClnS>
+                <ChooseClnContainerS>
+                    <HeaderCtnS>
+                        <Header>Error</Header>
+                    </HeaderCtnS>
+                </ChooseClnContainerS>
+            </ChooseClnS>
+        )
     }
 
     return(
@@ -110,7 +121,7 @@ const ChooseCln: React.FC<{}> = () => {
                 <CardsCtnS>
                     {cleaners.map(cln => <ClnCard 
                         cln={ cln } 
-                        action={ () => selectCln(cln._id)}
+                        action={ () => selectCln(cln._id) }
                     />)}  
                 </CardsCtnS>
             </ChooseClnContainerS>

@@ -13,25 +13,35 @@ import { useGlobalContext } from './context/global'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
-import ProtectedRoutes from './components/ProtectRoutes'
+import TokenAndCln from './components/TokenAndCln'
 import ChooseCln from './pages/ChooseCleaner'
-import ProtectedRoute from './components/protectedRoute'
+import TokenReq from './components/TokenRequired'
 
 function App() {
   const { global } = useGlobalContext()
+  const { token } = global
+
+  console.log('token from parent', global.token)
 
   return (
     <BrowserRouter>
       <GlobalStyles />
       <Routes>
-        <Route element={ <ProtectedRoutes global={ global } /> }>
-          <Route path='' element={ <Dashboard /> } />
+        <Route element={ <TokenAndCln global={ global } /> }>
+          <Route path='dashboard' element={ <Dashboard /> } >
+            <Route path=':orderId' element={ <Dashboard /> }>
+
+            </Route>
+          </Route>
         </Route>
-        <Route path='choose_cleaner' element={ 
-          <ProtectedRoute token={ global.token }>
-            <ChooseCln /> 
-          </ProtectedRoute>
-        }/>
+        <Route element={ <TokenReq global={ global }/> }>
+          <Route path='choose_cleaner' element={ 
+            <ChooseCln 
+              token={ global.token } 
+            /> 
+          }
+        />
+        </Route>    
         <Route path='login' element={ <Login /> } />
         <Route path='*' element={ <NotFound /> } />
       </Routes>
