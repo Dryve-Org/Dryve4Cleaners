@@ -22,7 +22,7 @@ const Dashboard = () => {
     
     useEffect(() => {
         setChosenOdr(params.orderId)
-    }, [ params ] )
+    }, [ params ])
     
     const retreiveOrder = async (orderId: string) => {
         nav(`${ orderId }`)

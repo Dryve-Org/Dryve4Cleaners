@@ -11,6 +11,7 @@ const GlobalStyles = createGlobalStyle`
 
     body {
         background-color: ${ colors.background };
+        overflow-x: none;
     }
 
      /* width */

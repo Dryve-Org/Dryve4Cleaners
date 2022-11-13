@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { retreivActiveOrders } from '../../constants/request'
 import { useGlobalContext } from '../../context/global'
-import MainErrorHook from '../../hook/handleAuth'
+import useMainErrHandler from '../../hook/MainErrorHook'
 import { OrderI } from '../../interface/api'
 import { colors } from '../../styles/colors'
 import { device } from '../../styles/viewport'
@@ -99,7 +99,8 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
     onOrderPress
 }: ActiveOrdersSideI) => {
     const [ activeOrders, setActiveOrders ] = useState<OrderI[]>([])
-    const { errorHandler } = MainErrorHook()
+    const [ loading, setLoading ] = useState<boolean>(true)
+    const { errorHandler } = useMainErrHandler()
 
     const {
         token,
@@ -107,14 +108,29 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
     } = useOutletContext<TokenAndClnOutletI>()
 
     const getActiveOrders = async () => {
-        const aO = await retreivActiveOrders(token, cleanerId, errorHandler)
-        if(!aO) return
-        setActiveOrders(aO)
+        try {
+            const aO = await retreivActiveOrders(token, cleanerId, errorHandler)
+            if(!aO) return
+            setActiveOrders(aO)
+        } finally {
+            setLoading(false)
+        }
     } 
 
     useEffect(() => {
         getActiveOrders()
     }, [])
+
+    if(loading) {
+        return (
+            <ActiveOrdersS>
+                <HeadS>
+                    <HeadTxtS>Active Orders</HeadTxtS>
+                    <HeadTxtS>Loading...</HeadTxtS>
+                </HeadS>
+            </ActiveOrdersS>
+        )
+    }
 
     return(
         <ActiveOrdersS>

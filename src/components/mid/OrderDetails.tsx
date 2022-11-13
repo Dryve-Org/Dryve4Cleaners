@@ -1,15 +1,17 @@
-import { OrderI, ServiceI } from "../../interface/api"
+import { OrderI, OrderstatusT, ServiceI } from "../../interface/api"
 import styled from 'styled-components'
 import RequestedServices from "../container/RequestedServices"
 import { device } from "../../styles/viewport"
 import { colors } from "../../styles/colors"
 import EditServices from "../container/EditServices"
 import { useEffect, useState } from "react"
-import { clothesReady, getOrder, UpdateServices } from "../../constants/request"
+import { approveOrder, clothesReady, getOrder, UpdateServices } from "../../constants/request"
 import { useGlobalContext } from "../../context/global"
-import { useOutletContext } from "react-router-dom"
+import { useNavigate, useOutletContext } from "react-router-dom"
 import { TokenAndClnOutletI } from "../TokenAndCln"
 import _ from 'lodash'
+import YayONay from "../container/popups/YayONay"
+import useMainErrHandler from '../../hook/MainErrorHook'
 
 //ODs = OrderDetails
 
@@ -131,7 +133,13 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
     const [ dServices, setDServices ] = useState<OrderI['desiredServices']>([])
     const [ orderTotal, setOrderTotal ] = useState<OrderI['orderTotal']>()
     const [ updatedSvcs, setUpdatedSvcs ] = useState<boolean>(false)
+    const [ approvalPop, setApprovalPop ] = useState<boolean>(false)
+    const [ loading, setLoading ] = useState<boolean>(true)
+    const [ popLoading, setPopLoading ] = useState<boolean>(false)
     const { token } = useOutletContext<TokenAndClnOutletI>()
+    const { errorHandler } = useMainErrHandler()
+
+    const nav = useNavigate()
 
     useEffect(() => {
         let total = 0
@@ -145,15 +153,32 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
     }, [ dServices ])
 
     useEffect(() => {
+        const validStatuses: OrderstatusT[]  = [
+            'Clothes Awaiting Pricing',
+            'Clothes Being Cleaned',
+            'Clothes Awaiting Clean',
+            'Clothes Ready'
+        ]
+
         if(orderId) {
+            setLoading(true)
             getOrder(token, orderId)
                 .then(res => {
                     if(!res) return
+
+                    if(!validStatuses.includes(res.status)) {
+                        alert('You can no longer edit this order')
+                        nav('/dashboard')
+                    }
+
                     setOrder(res)
                     if(res.desiredServices.length) {
                         setDServices(res?.desiredServices)
                     }
+
+                    setApprovalPop(!res.cleanerApproved)
                 })
+                .finally(() => setLoading(false))
         } else {
             setOrder(undefined)
         }
@@ -174,6 +199,22 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 </ErrorS>
             </OrderDetailsS>
         )
+    }
+
+    const handleAproval = async () => {
+        try {
+            if(!orderId) return
+            setPopLoading(true)
+            const order = await approveOrder(token, orderId, errorHandler)
+            setOrder(order)
+        } catch {
+            alert(
+                'Something wrong. Please try again or contact a Dryve Representative.'
+            )
+        }
+        finally {
+            setApprovalPop(false)
+        }
     }
 
     const addSubSvc = (
@@ -236,77 +277,92 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
 
     const handleReadyBttn = () => {
         if(!dServices.length || !order) return
+        setLoading(true)
 
         clothesReady(
             token,
             order._id
-        ).then(res => {
+        ).then(async (res) => {
             setUpdatedSvcs(false)
-            if(res) {
-                setOrder(res)
-            }
+            res && await setOrder(res)
         })
+        .finally(() => setLoading(false))
     }
 
     return (
-        <OrderDetailsS open={ order ? true : false }>
-            <BackBttnS
-                onClick={() => back()}
-            >
-                Back
-            </BackBttnS>
-            { order && <>
-                <ODsHeadCtnS>
-                    <ODsHeadPartS>
-                        <ODsHeadTxtS>
-                            Client
-                        </ODsHeadTxtS>
-                        <ODsHeadNameS>
-                            {`${ order.client.firstName } ${ order.client.lastName }`}
-                        </ODsHeadNameS>
-                        <ODsHeadPhnS>
-                            {`${ order.client.phoneNumber }`}
-                        </ODsHeadPhnS>
-                    </ODsHeadPartS>
-                    <ODsHeadPartS>
-                        <ODsHeadTxtS>
-                            Driver
-                        </ODsHeadTxtS>
-                        <ODsHeadNameS>
-                            {`${ order.pickUpDriver.user.firstName } ${ order.pickUpDriver.user.lastName }`}
-                        </ODsHeadNameS>
-                        <ODsHeadPhnS>
-                            {`${ order.pickUpDriver.user.phoneNumber }`}
-                        </ODsHeadPhnS>
-                    </ODsHeadPartS>
-                </ODsHeadCtnS>
-                <ODsBodyS>
-                    <RequestedServices 
-                        desiredServices={ dServices }
-                        orderTotal={ orderTotal }
-                        isUpdated={ updatedSvcs }
-                    />
-                    <EditServices 
-                        clnId={ order.cleaner._id }
-                        addSubSvc={ addSubSvc }
-                    />
-                </ODsBodyS>
-            </>}
-            <BttmBttnCtnS>
-                {
-                    updatedSvcs && <UpdateBttnS onClick={() => update()}>
-                        Update
-                    </UpdateBttnS>
+        <>
+            <YayONay 
+                display={approvalPop}
+                head="Do you accept this order?"
+                subHead="Yes makes you liable for this order" 
+                onYes={ handleAproval } 
+                onNo={ () => {
+                        setApprovalPop(false)
+                        alert('You will not be able to edit this order unless approved.')
+                    } 
                 }
-                {
-                    dServices.length && order?.status === 'Clothes Being Cleaned' && !updatedSvcs ? 
-                    <ReadyBttnS onClick={() => handleReadyBttn()}>
-                        Ready For Pickup
-                    </ReadyBttnS>
-                    : null
-                }
-            </BttmBttnCtnS>
-        </OrderDetailsS>
+                loading={ popLoading }
+            />
+
+            <OrderDetailsS open={ order ? true : false }>
+                <BackBttnS
+                    onClick={() => back()}
+                >
+                    Back
+                </BackBttnS>
+                { order && <>
+                    <ODsHeadCtnS>
+                        <ODsHeadPartS>
+                            <ODsHeadTxtS>
+                                Client
+                            </ODsHeadTxtS>
+                            <ODsHeadNameS>
+                                {`${ order.client.firstName } ${ order.client.lastName }`}
+                            </ODsHeadNameS>
+                            <ODsHeadPhnS>
+                                {`${ order.client.phoneNumber }`}
+                            </ODsHeadPhnS>
+                        </ODsHeadPartS>
+                        <ODsHeadPartS>
+                            <ODsHeadTxtS>
+                                Driver
+                            </ODsHeadTxtS>
+                            <ODsHeadNameS>
+                                {`${ order.pickUpDriver.user.firstName } ${ order.pickUpDriver.user.lastName }`}
+                            </ODsHeadNameS>
+                            <ODsHeadPhnS>
+                                {`${ order.pickUpDriver.user.phoneNumber }`}
+                            </ODsHeadPhnS>
+                        </ODsHeadPartS>
+                    </ODsHeadCtnS>
+                    <ODsBodyS>
+                        <RequestedServices 
+                            desiredServices={ dServices }
+                            orderTotal={ orderTotal }
+                            isUpdated={ updatedSvcs }
+                        />
+                        <EditServices 
+                            clnId={ order.cleaner._id }
+                            addSubSvc={ addSubSvc }
+                        />
+                    </ODsBodyS>
+                </>}
+                <BttmBttnCtnS>
+                    {
+                        updatedSvcs && <UpdateBttnS onClick={() => update()}>
+                            Update
+                        </UpdateBttnS>
+                    }
+                    {
+                        dServices.length && order?.status === 'Clothes Being Cleaned' && !updatedSvcs ? 
+                        <ReadyBttnS onClick={() => handleReadyBttn()}>
+                            Ready For Pickup
+                        </ReadyBttnS>
+                        : null
+                    }
+                </BttmBttnCtnS>
+            </OrderDetailsS>
+        </>
     )
 }
 

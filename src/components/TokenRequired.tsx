@@ -14,9 +14,12 @@ const TokenReq = ({
     children,
 }: TokenReqI) => {
     const nav = useNavigate()
+
     if (!global.token) {
-      nav(redirectPath)
-      return <></>
+        console.log('redirect token checked')
+        alert('Must login')
+        // nav(redirectPath)
+        return <Navigate to='/login' />
     }
   
     return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { api, getAttachedCleaners } from '../constants/request'
 import { useGlobalContext } from '../context/global'
+import useMainErrHandler from '../hook/MainErrorHook'
 import { CleanerI } from '../interface/api'
 import { Token } from '../interface/general'
 import { colors } from '../styles/colors'
@@ -26,7 +27,9 @@ const Header = styled.h2`
 
 const CardsCtnS = styled.section`
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
     margin: 0 10%;
 `
 
@@ -79,15 +82,19 @@ const ChooseCln: React.FC<{
     token: Token
 }> = ({ token }) => {
     const nav = useNavigate()
+    const [ loading, setLoading ] = useState<boolean>(true)
     const [ cleaners, setCleaners ] = useState<CleanerI[]>([])
     const { global, setGlobal } = useGlobalContext()
+    const { errorHandler } = useMainErrHandler()
 
     useEffect(() => {
-        console.log('token', token)
-        getAttachedCleaners(token)
+        getAttachedCleaners(token, errorHandler)
             .then(res => {
                 if(!res) return
                 setCleaners(res)
+            })
+            .finally(() => {
+                setLoading(false)
             })
     }, [])
 
@@ -98,6 +105,18 @@ const ChooseCln: React.FC<{
         })
 
         nav('/dashboard')
+    }
+
+    if(loading) {
+        return (
+            <ChooseClnS>
+                <ChooseClnContainerS>
+                    <HeaderCtnS>
+                        <Header>Loading...</Header>
+                    </HeaderCtnS>
+                </ChooseClnContainerS>
+            </ChooseClnS>
+        )
     }
 
     if(!cleaners.length) {

@@ -16,16 +16,12 @@ export interface TokenAndClnOutletI {
 const TokenAndCln = ({
     global,
     redirectPath = '/login',
-    children,
 }: TokenAndClnI) => {
     const { token, cleanerId } = global
-
-    const nav = useNavigate()
-
-    if (!token) {
-      nav(redirectPath)
-      return <></>
-    } else if(!cleanerId) {
+    
+    if (token === '') {
+      return <Navigate to={ redirectPath } />
+    } else if(cleanerId === '') {
         // nav('choose_cleaner')
         return <Navigate to='choose_cleaner' />
     }

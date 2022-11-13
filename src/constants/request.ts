@@ -44,11 +44,25 @@ export const retreivActiveOrders = async (
 
         return activeOrders
     } catch(e) {
-        console.log('it got here')
-        
         return undefined
     }
-} 
+}
+
+export const approveOrder = async (
+    token: string,
+    orderId: OrderI['_id'],
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const order = await api(token, errorHandler)
+            .put<OrderI>(`/cleanerPro/order/${ orderId }/approve_dropoff`)
+            .then(res => res.data)
+
+        return order
+    } catch {
+        return undefined
+    }
+}
 
 /**
  * It gets an order from the server, and if it fails, it returns undefined.
@@ -62,7 +76,7 @@ export const getOrder = async (
     errorHandler?: (e: any) => void
 ) => {
     try {
-        const orderData = await api(token)
+        const orderData = await api(token, errorHandler)
             .get<OrderI>(`/cleanerPro/order/${ orderId }`)
             .then(res => res.data)
             .catch(() => {
@@ -81,7 +95,7 @@ export const getAttachedCleaners = async (
     errorHandler?: (e: any) => void
 ) => {
     try {
-        const cleaners = await api(token)
+        const cleaners = await api(token, errorHandler)
         .get<CleanerI[]>('/cleanerPro/attached_cleaners')
         .then(res => {
             return res.data
@@ -89,7 +103,6 @@ export const getAttachedCleaners = async (
 
         return cleaners
     } catch(e) {
-        errorHandler && errorHandler(e)
         return undefined
     }
 
@@ -107,7 +120,7 @@ export const getServices = async (
     errorHandler?: (e: any) => void
 ) => {
     try {
-        const services = await api(token)
+        const services = await api(token, errorHandler)
             .get<CleanerI['services']>(`/cleanerPro/cleaner/${ clnId }/services`)
             .then(res => res.data)
         
@@ -130,7 +143,7 @@ export const UpdateServices = async (
             quantity: ds.quantity
         }))
 
-        const update = await api(token)
+        const update = await api(token, errorHandler)
             .put<OrderI>(
                 `/cleanerPro/order/${orderId}/update_services`,
                 {
@@ -152,15 +165,14 @@ export const clothesReady = async (
     errorHandler?: (e: any) => void
 ) => {
     try {
-        const update = await api(token)
+        const update = await api(token, errorHandler)
             .put<OrderI>(
                 `/cleanerPro/order/${orderId}/clothes_ready`
             )
             .then(res => res.data)
 
         return update
-    } catch(e: any) {
-        errorHandler && errorHandler(e)
+    } catch(e) {
         return undefined
     }
 }

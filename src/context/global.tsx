@@ -4,8 +4,8 @@ import { retreiveClnId, retreiveToken } from '../constants/localstorage';
 
 export interface GlobalI {
     token: string
-    loading: boolean
     cleanerId: string
+    loading: boolean
 }
 
 interface contextI {
@@ -23,9 +23,9 @@ const GlobalContextProvider = (props: GlobalContextProps) => {
     const [ global, setGlobal ] = useState<GlobalI>({
         //if token doesn't exist user should
         //have to go to login screen
-        token: "",
+        token: '',
         cleanerId: '',
-        loading: false
+        loading: true
     })
 
     useEffect(() => {
@@ -34,7 +34,8 @@ const GlobalContextProvider = (props: GlobalContextProps) => {
         setGlobal({ 
             ...global, 
             token,
-            cleanerId 
+            cleanerId,
+            loading: false
         })
     }, [])
 

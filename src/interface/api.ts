@@ -146,4 +146,5 @@ export interface OrderI {
     }
     serviceCost?: number
     orderTotal?: number
+    cleanerApproved: boolean
 }

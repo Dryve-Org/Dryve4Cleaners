@@ -39,7 +39,7 @@ const CardS = styled.div`
     border-radius: 20px;
     text-align: center;
     border: 2px solid ${ colors.offGold };
-    min-width: 200px;
+    min-width: 250px;
     max-width: 350px;
     color: ${ colors.black };
     margin-bottom: 1em;

@@ -16,16 +16,18 @@ import NotFound from './pages/NotFound'
 import TokenAndCln from './components/TokenAndCln'
 import ChooseCln from './pages/ChooseCleaner'
 import TokenReq from './components/TokenRequired'
+import MainHeader from './components/TopHeader/MainHeader'
+import GlobalLoading from './components/container/loading'
 
 function App() {
   const { global } = useGlobalContext()
-  const { token } = global
-
-  console.log('token from parent', global.token)
+  
+  if(global.loading) return <GlobalLoading />
 
   return (
     <BrowserRouter>
       <GlobalStyles />
+      <MainHeader />
       <Routes>
         <Route element={ <TokenAndCln global={ global } /> }>
           <Route path='dashboard' element={ <Dashboard /> } >
