@@ -12,6 +12,7 @@ export type coordinatesT = [
     number //longitude
 ]
 
+
 export interface PointI {
     type: 'Point'
     coordinates: coordinatesT
