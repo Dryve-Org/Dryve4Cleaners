@@ -17,6 +17,7 @@ export interface PointI {
     coordinates: coordinatesT
 }
 
+
 export interface AddressI {
     _id: string
     name?: string
