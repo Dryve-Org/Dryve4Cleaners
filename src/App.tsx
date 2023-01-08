@@ -18,11 +18,18 @@ import ChooseCln from './pages/ChooseCleaner'
 import TokenReq from './components/TokenRequired'
 import MainHeader from './components/TopHeader/MainHeader'
 import GlobalLoading from './components/container/loading'
+import { useEffect } from 'react'
 
 function App() {
   const { global } = useGlobalContext()
   
   if(global.loading) return <GlobalLoading />
+
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    navigate('/dashboard')
+  }, [])
 
   return (
     <BrowserRouter>
