@@ -2,7 +2,6 @@
   "name": "dryve4cleaners",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://clownfish-app-66wbx.ondigitalocean.app",
   "dependencies": {
     "@jcoreio/async-throttle": "^1.4.3",
     "@testing-library/jest-dom": "^5.16.5",
@@ -14,6 +13,7 @@
     "@types/react": "^18.0.19",
     "@types/react-dom": "^18.0.6",
     "axios": "^0.27.2",
+    "dotenv": "^16.0.3",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

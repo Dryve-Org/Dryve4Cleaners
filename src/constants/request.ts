@@ -9,8 +9,9 @@ import { CleanerI, OrderI } from '../interface/api'
  * "Bearer null"
 */
 export const api = (providedToken?: string, errorHandler?: (e: any) => void ) => {
+    console.log('env', process.env)
     const theApi = axios.create({
-        baseURL: '/',
+        baseURL: process.env.REACT_APP_API_URL,
         headers: {
             "Authorization": `Bearer ${ providedToken ? providedToken : 'null' }`,
         }

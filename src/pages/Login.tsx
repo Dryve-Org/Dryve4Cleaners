@@ -107,7 +107,7 @@ const Login = () => {
 
     //when user logs in
     const submit = async (values: LoginValuesI) => {
-        await axios.post<GlobalI['token']>('/cleanerPro/login', values)
+        await axios.post<GlobalI['token']>(process.env.REACT_APP_API_URL as string + '/cleanerPro/login', values)
             .then(res => {
                 setGlobal({ ...global, token: res.data })
                 nav('/dashboard')
