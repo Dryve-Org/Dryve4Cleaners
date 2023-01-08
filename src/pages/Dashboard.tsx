@@ -17,6 +17,7 @@ const DashboardS = styled.section`
 
 const Dashboard = () => {
     const [ chosenOdr, setChosenOdr ] = useState<OrderI['_id']>()
+    const [ orderUpdate, setOrderUpdate ] = useState<boolean>(false)
     const params = useParams<{ orderId: string }>()
     const nav = useNavigate()
     
@@ -32,10 +33,13 @@ const Dashboard = () => {
         <DashboardS>
             <ActiveOrdersSide 
                 onOrderPress={ retreiveOrder }
+                orderUpdate={ orderUpdate }
+                setOrderUpdate={ setOrderUpdate }
             />
             <OrderDetails 
                 orderId={ chosenOdr }
                 back={ () => nav('') }
+                setOrderUpdate={ setOrderUpdate }
             />
         </DashboardS>
     )

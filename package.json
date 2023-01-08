@@ -2,8 +2,9 @@
   "name": "dryve4cleaners",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://guarded-temple-56367.herokuapp.com",
+  "proxy": "https://clownfish-app-66wbx.ondigitalocean.app",
   "dependencies": {
+    "@jcoreio/async-throttle": "^1.4.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

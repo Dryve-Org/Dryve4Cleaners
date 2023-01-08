@@ -1,3 +1,4 @@
+import throttle from '@jcoreio/async-throttle'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { numToMoney } from '../../constants/money'
@@ -150,8 +151,10 @@ const EditServices: React.FC<EditServicesI> = ({
     const { global } = useGlobalContext()
     const { token } = global
 
+    const getServicesThrt = throttle(getServices, 1000)
+
     useEffect(() => {
-        getServices(token, clnId)
+        getServicesThrt(token, clnId)
             .then(res => {
                 if(res) {
                     setServices(res)

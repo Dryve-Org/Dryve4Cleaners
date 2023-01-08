@@ -1,3 +1,4 @@
+import throttle from '@jcoreio/async-throttle'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -86,9 +87,12 @@ const ChooseCln: React.FC<{
     const [ cleaners, setCleaners ] = useState<CleanerI[]>([])
     const { global, setGlobal } = useGlobalContext()
     const { errorHandler } = useMainErrHandler()
+    
+    const getAttachedCleanersThrt = throttle(getAttachedCleaners, 1000)
+
 
     useEffect(() => {
-        getAttachedCleaners(token, errorHandler)
+        getAttachedCleanersThrt(token, errorHandler)
             .then(res => {
                 if(!res) return
                 setCleaners(res)

@@ -176,3 +176,21 @@ export const clothesReady = async (
         return undefined
     }
 }
+
+export const clothesUnReady = async (
+    token: string,
+    orderId: string,
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const update = await api(token, errorHandler)
+            .patch<OrderI>(
+                `/cleanerPro/order/${orderId}/clothes_ready`
+            )
+            .then(res => res.data)
+
+        return update
+    } catch(e) {
+        return undefined
+    }
+}

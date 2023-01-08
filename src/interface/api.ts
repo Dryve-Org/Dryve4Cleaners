@@ -100,6 +100,8 @@ export type desiredService = {
 
 export interface OrderI {
     _id: string
+    building: string
+    unit: string
     client: {
         firstName: string
         lastName: string

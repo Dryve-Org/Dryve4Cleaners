@@ -1,3 +1,4 @@
+import throttle from '@jcoreio/async-throttle'
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
@@ -85,7 +86,8 @@ const OrderCards: React.FC<{odr: OrderI, action: Function}> = ({
     return(
         <CardS onClick={() => action()}>
             <CardTtlS>{`${odr.client.firstName} ${ odr.client.lastName }` }</CardTtlS>
-            <CardPhn>{ odr.client.phoneNumber }</CardPhn>
+            <CardTxtItal>Building: {odr.building}</CardTxtItal>
+            <CardTxtItal>Unit: {odr.unit}</CardTxtItal>
             <CardTxtItal>{ odr.status }</CardTxtItal>
         </CardS>
     )
@@ -93,10 +95,14 @@ const OrderCards: React.FC<{odr: OrderI, action: Function}> = ({
 
 interface ActiveOrdersSideI {
     onOrderPress: (orderId: string) => void
+    orderUpdate: boolean
+    setOrderUpdate: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
-    onOrderPress
+    onOrderPress,
+    orderUpdate,
+    setOrderUpdate
 }: ActiveOrdersSideI) => {
     const [ activeOrders, setActiveOrders ] = useState<OrderI[]>([])
     const [ loading, setLoading ] = useState<boolean>(true)
@@ -114,12 +120,21 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
             setActiveOrders(aO)
         } finally {
             setLoading(false)
+            setOrderUpdate(false)
         }
-    } 
+    }
+
+    const getActiveOrdersThrt = throttle(getActiveOrders, 100)
 
     useEffect(() => {
-        getActiveOrders()
+        getActiveOrdersThrt()
     }, [])
+
+    useEffect(() => {
+        if(orderUpdate) {
+            getActiveOrdersThrt()
+        }
+    }, [ orderUpdate ])
 
     if(loading) {
         return (
@@ -136,6 +151,7 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
         <ActiveOrdersS>
             <HeadS>
                 <HeadTxtS>Active Orders</HeadTxtS>
+                {!activeOrders.length && <HeadTxtS>No Orders</HeadTxtS>}
             </HeadS>
             <CardsCtnS>
                 {activeOrders.map(odr => <OrderCards 

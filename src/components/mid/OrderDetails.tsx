@@ -5,11 +5,12 @@ import { device } from "../../styles/viewport"
 import { colors } from "../../styles/colors"
 import EditServices from "../container/EditServices"
 import { useEffect, useState } from "react"
-import { approveOrder, clothesReady, getOrder, UpdateServices } from "../../constants/request"
+import { approveOrder, clothesReady, clothesUnReady, getOrder, UpdateServices } from "../../constants/request"
 import { useGlobalContext } from "../../context/global"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { TokenAndClnOutletI } from "../TokenAndCln"
-import _ from 'lodash'
+import { findIndex } from 'lodash'
+import throttle from '@jcoreio/async-throttle'
 import YayONay from "../container/popups/YayONay"
 import useMainErrHandler from '../../hook/MainErrorHook'
 
@@ -29,12 +30,29 @@ const OrderDetailsS = styled.section<OrderDetailsSI>`
     height: 100%;
     transition: all ease 1s;
     border-left: 3px solid ${ colors.orange };
+    transition: 1s ease all;
 
     @media ${ device.desktop } {
+        position: relative;
+        right: initial;
         border-left: none;
-        position: initial;
         background-color: transparent;
     }
+    
+`
+
+const LoadingS = styled.div`
+    position: absolute;
+    display: fixed;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 99vh;
+    background-color: ${ colors.black }80;
+    color: ${ colors.orange };
+    font-size: 28px;
+    font-weight: 500;
+    text-align: center;
 `
 
 const BackBttnS = styled.button`
@@ -109,9 +127,21 @@ const ReadyBttnS = styled.button`
     }
 `
 
-const ErrorS = styled.div`
-    
+const UnReadyBttnS = styled.button`
+    padding: 1em;
+    border-radius: 10px;
+    color: ${ colors.orange };
+    border: 3px solid ${ colors.orange };
+    font-weight: 800;
+    background-color: ${ colors.black };
+
+    &:hover {
+        cursor: pointer;
+        border: 2px solid white;
+    }
 `
+
+const ErrorS = styled.div``
 
 const ErrorTxtS = styled.p`
     text-align: center;
@@ -123,18 +153,20 @@ const ErrorTxtS = styled.p`
 interface OrderDetailsI {
     orderId: OrderI['_id'] | undefined
     back: Function
+    setOrderUpdate: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const OrderDetails: React.FC<OrderDetailsI> = ({
     orderId,
     back,
+    setOrderUpdate
 }: OrderDetailsI) => {
     const [ order, setOrder ] = useState<OrderI>()
     const [ dServices, setDServices ] = useState<OrderI['desiredServices']>([])
     const [ orderTotal, setOrderTotal ] = useState<OrderI['orderTotal']>()
     const [ updatedSvcs, setUpdatedSvcs ] = useState<boolean>(false)
     const [ approvalPop, setApprovalPop ] = useState<boolean>(false)
-    const [ loading, setLoading ] = useState<boolean>(true)
+    const [ loading, setLoading ] = useState<boolean>(false)
     const [ popLoading, setPopLoading ] = useState<boolean>(false)
     const { token } = useOutletContext<TokenAndClnOutletI>()
     const { errorHandler } = useMainErrHandler()
@@ -160,9 +192,11 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             'Clothes Ready'
         ]
 
+        const getOrderThrt = throttle(getOrder, 1000)
+
         if(orderId) {
             setLoading(true)
-            getOrder(token, orderId)
+            getOrderThrt(token, orderId)
                 .then(res => {
                     if(!res) return
 
@@ -214,6 +248,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         }
         finally {
             setApprovalPop(false)
+            setOrderUpdate(true)
         }
     }
 
@@ -222,7 +257,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         subtract: boolean,
         service: ServiceI
     ) => {
-        const index = _.findIndex(dServices, { 
+        const index = findIndex(dServices, { 
             service: {
                 _id: serviceId
             }
@@ -273,21 +308,67 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             console.log('success', res)
             setUpdatedSvcs(false)
         })
-    }
-
-    const handleReadyBttn = () => {
-        if(!dServices.length || !order) return
-        setLoading(true)
-
-        clothesReady(
-            token,
-            order._id
-        ).then(async (res) => {
-            setUpdatedSvcs(false)
-            res && await setOrder(res)
+        .finally(() => {
+            setOrderUpdate(true)
         })
-        .finally(() => setLoading(false))
     }
+
+    const handleReadyBttn = async () => {
+        try {
+            if(!dServices.length || !order) return
+            setLoading(true)
+        
+            const updatedOrder = await clothesReady(
+                token,
+                order._id
+            )
+
+            if(!updatedOrder) return
+
+            setOrder(updatedOrder)
+            setUpdatedSvcs(false)
+        } catch(e) {
+            console.error(e)
+        } finally {
+            setLoading(false)
+            setOrderUpdate(true)
+        }
+            
+    }
+
+    const handleUnreadyBttn = async () => {
+        try {
+            if(order?.status !== 'Clothes Ready') return
+            setLoading(true)
+
+            const updatedOrder = await clothesUnReady(
+                token, 
+                order._id, 
+                errorHandler
+            )
+
+            if(!updatedOrder) return
+
+            setOrder(updatedOrder)
+        } catch(e) {
+            console.log(e)
+        } finally {
+            setOrderUpdate(true)
+            setLoading(false)
+        }
+    }
+
+
+    if(!orderId) return <></> 
+
+    if(!order) return (
+        <OrderDetailsS open={ order ? true : false }>
+            <ODsHeadTxtS>
+                Unable to Retreive order
+            </ODsHeadTxtS>
+        </OrderDetailsS>
+    )
+
 
     return (
         <>
@@ -303,50 +384,54 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 }
                 loading={ popLoading }
             />
-
             <OrderDetailsS open={ order ? true : false }>
+                {loading &&
+                    <LoadingS>
+                        <p>loading...</p>
+                    </LoadingS>
+                }
                 <BackBttnS
                     onClick={() => back()}
                 >
                     Back
                 </BackBttnS>
-                { order && <>
-                    <ODsHeadCtnS>
-                        <ODsHeadPartS>
-                            <ODsHeadTxtS>
-                                Client
-                            </ODsHeadTxtS>
-                            <ODsHeadNameS>
-                                {`${ order.client.firstName } ${ order.client.lastName }`}
-                            </ODsHeadNameS>
-                            <ODsHeadPhnS>
-                                {`${ order.client.phoneNumber }`}
-                            </ODsHeadPhnS>
-                        </ODsHeadPartS>
-                        <ODsHeadPartS>
-                            <ODsHeadTxtS>
-                                Driver
-                            </ODsHeadTxtS>
-                            <ODsHeadNameS>
-                                {`${ order.pickUpDriver.user.firstName } ${ order.pickUpDriver.user.lastName }`}
-                            </ODsHeadNameS>
-                            <ODsHeadPhnS>
-                                {`${ order.pickUpDriver.user.phoneNumber }`}
-                            </ODsHeadPhnS>
-                        </ODsHeadPartS>
-                    </ODsHeadCtnS>
-                    <ODsBodyS>
-                        <RequestedServices 
-                            desiredServices={ dServices }
-                            orderTotal={ orderTotal }
-                            isUpdated={ updatedSvcs }
-                        />
+                <ODsHeadCtnS>
+                    <ODsHeadPartS>
+                        <ODsHeadTxtS>
+                            Client
+                        </ODsHeadTxtS>
+                        <ODsHeadNameS>
+                            {`${ order.client.firstName } ${ order.client.lastName }`}
+                        </ODsHeadNameS>
+                        <ODsHeadPhnS>
+                            {`${ order.client.phoneNumber }`}
+                        </ODsHeadPhnS>
+                    </ODsHeadPartS>
+                    <ODsHeadPartS>
+                        <ODsHeadTxtS>
+                            Driver
+                        </ODsHeadTxtS>
+                        <ODsHeadNameS>
+                            {`${ order.pickUpDriver.user.firstName } ${ order.pickUpDriver.user.lastName }`}
+                        </ODsHeadNameS>
+                        <ODsHeadPhnS>
+                            {`${ order.pickUpDriver.user.phoneNumber }`}
+                        </ODsHeadPhnS>
+                    </ODsHeadPartS>
+                </ODsHeadCtnS>
+                <ODsBodyS>
+                    <RequestedServices 
+                        desiredServices={ dServices }
+                        orderTotal={ orderTotal }
+                        isUpdated={ updatedSvcs }
+                    />
+                    {order.status === 'Clothes Awaiting Pricing' &&
                         <EditServices 
                             clnId={ order.cleaner._id }
                             addSubSvc={ addSubSvc }
                         />
-                    </ODsBodyS>
-                </>}
+                    }
+                </ODsBodyS>
                 <BttmBttnCtnS>
                     {
                         updatedSvcs && <UpdateBttnS onClick={() => update()}>
@@ -359,6 +444,11 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                             Ready For Pickup
                         </ReadyBttnS>
                         : null
+                    }
+                    {
+                        order.status === 'Clothes Ready' && <UnReadyBttnS onClick={ () => handleUnreadyBttn() }>
+                            Unready
+                        </UnReadyBttnS>
                     }
                 </BttmBttnCtnS>
             </OrderDetailsS>

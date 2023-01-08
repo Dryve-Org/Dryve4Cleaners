@@ -27,7 +27,7 @@ function App() {
   return (
     <BrowserRouter>
       <GlobalStyles />
-      <MainHeader />
+      {global.token && <MainHeader />}
       <Routes>
         <Route element={ <TokenAndCln global={ global } /> }>
           <Route path='dashboard' element={ <Dashboard /> } >
