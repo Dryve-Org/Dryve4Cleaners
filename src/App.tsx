@@ -4,7 +4,6 @@ import {
   Navigate, 
   Route, 
   Routes, 
-  useNavigate
 } from 'react-router-dom'
 import GlobalStyles from './styles/global'
 import { useGlobalContext } from './context/global'
@@ -24,12 +23,6 @@ function App() {
   const { global } = useGlobalContext()
   
   if(global.loading) return <GlobalLoading />
-
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    navigate('/dashboard')
-  }, [])
 
   return (
     <BrowserRouter>
