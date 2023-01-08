@@ -12,11 +12,11 @@ export type coordinatesT = [
     number //longitude
 ]
 
+
 export interface PointI {
     type: 'Point'
     coordinates: coordinatesT
 }
-
 
 export interface AddressI {
     _id: string
