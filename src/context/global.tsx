@@ -1,5 +1,6 @@
 import React, { useState, createContext, Dispatch, SetStateAction, useEffect } from 'react';
 import { retreiveClnId, retreiveToken } from '../constants/localstorage';
+import { CleanerI } from '../interface/api';
 
 
 export interface GlobalI {

@@ -38,6 +38,7 @@ export interface ServiceI {
     price: number
     title: string
     description?: string
+    perPound: boolean
 }
 
 export type QuantityT = {
@@ -57,6 +58,8 @@ export interface CleanerI {
     address: AddressI
     services: ServiceI[]
     preferred?: boolean
+    minPriceServiceId: string | ServiceI
+    minPrice: number
 }
 
 export type OrderstatusT = "Task Posted Pickup" |
@@ -95,12 +98,14 @@ export const orderStatuses: OrderstatusT[] = [
 
 export type desiredService = {
     quantity: number
+    weight?: number
     service: ServiceI //stored prices of each service and change to string
     _id: string
 }
 
 export interface OrderI {
     _id: string
+    aptName: string
     building: string
     unit: string
     client: {
@@ -113,6 +118,11 @@ export interface OrderI {
     cleanerAddress: string
     driverLocation?: PointI
     // locationSession?: string //long and lat of clothes location
+    /**
+     * @Interface DriverI
+     * 
+     * pickUpDriver is the driver that picks up clothes from client
+     */
     pickUpDriver: {
         '_id': string
         user: {
@@ -120,7 +130,7 @@ export interface OrderI {
             lastName: string
             phoneNumber: string
         }
-    } // driver
+    }
     dropOffDriver?: string
     pickUpCostId?: string // cost for drive to Cleaners
     dropOffCostId?: string // cost for drive from Cleaner to origin

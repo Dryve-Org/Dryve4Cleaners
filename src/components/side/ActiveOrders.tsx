@@ -6,19 +6,21 @@ import { retreivActiveOrders } from '../../constants/request'
 import { useGlobalContext } from '../../context/global'
 import useMainErrHandler from '../../hook/MainErrorHook'
 import { OrderI } from '../../interface/api'
-import { colors } from '../../styles/colors'
+import { colorList } from '../../styles/colors'
 import { device } from '../../styles/viewport'
 import { TokenAndClnOutletI } from '../TokenAndCln'
 
 const ActiveOrdersS = styled.section`
+    overflow: auto;
     @media ${ device.desktop } {
         display: flex;
         flex-direction: column;
         width: 35%;
         max-width: 300px;
-        height: 100vh;
-        background-color: ${ colors.black };
+        height: calc(100vh - 60px);
+        /* background-color: ${ colorList.a1 }; */
         /* overflow: hidden; */
+        /* box-shadow: inset 0px 0px 10px 1px ${ colorList.w3 }; */
     }
 `
 
@@ -28,8 +30,13 @@ const HeadS = styled.div`
 
 const HeadTxtS = styled.h3`
     text-align: center;
-    font-size: 30px;
-    color: ${ colors.orange };
+    font-size: 1.5em;
+    color: ${ colorList.a3 };
+`
+
+const SubHeadTxtS = styled(HeadTxtS)`
+    font-size: 1em;
+    color: ${ colorList.w1 };
 `
 
 const CardsCtnS = styled.section`
@@ -49,32 +56,61 @@ const CardsCtnS = styled.section`
     }
 `
 
-const CardS = styled.div`
+const CardS = styled.div<{status: OrderI['status']}>`
     width: 100%;
-    background-color: whitesmoke;
+    /* background-color: ${ colorList.a3 }; */
+    background-color: transparent;
+    color: ${ colorList.a3 };
     border-radius: 20px;
-    max-width: 300px;
+    max-width: 250px;
+    word-wrap: break-word;
     text-align: center;
     font-weight: 500;
-    padding: 15px 0;
-    border: 3px solid ${ colors.orange };
+    padding: 10px 0;
+    cursor: pointer;
+    border: 2px solid ${ 
+        ({ status }) => {
+            if(status === 'Clothes Awaiting Pricing') return colorList.w1
+            if(status === 'Clothes Being Cleaned') return colorList.a1
+            if(status === 'Clothes Ready') return colorList.c1
+        }
+    };
+    box-shadow: inset 0px 0px 20px 2px ${ 
+        ({ status }) => {
+            if(status === 'Clothes Awaiting Pricing') return colorList.w1
+            if(status === 'Clothes Being Cleaned') return colorList.a1
+            if(status === 'Clothes Ready') return colorList.c1
+        }
+    };
 
     &:hover {
-        background-color: beige;
+        border: 1px solid ${ 
+            ({ status }) => {
+                if(status === 'Clothes Awaiting Pricing') return colorList.w1
+                if(status === 'Clothes Being Cleaned') return colorList.a1
+                if(status === 'Clothes Ready') return colorList.c1
+            }
+        };
+        box-shadow: none;
     }
+
+    transition: all 0.3s ease-in-out;
+`
+
+const HighlightS = styled.span`
+    color: ${ colorList.c1 };
 `
 
 const CardTtlS = styled.p`
-    font-size: 20px;
-    
+    font-size: 1.2em;
 `
 
 const CardPhn = styled.p`
-    font-size: 18px;
+    font-size: 1em;
 `
 
 const CardTxtItal = styled.p`
-    font-size: 18px;
+    font-size: 1em;
     font-style: italic;
 `
 
@@ -84,11 +120,11 @@ const OrderCards: React.FC<{odr: OrderI, action: Function}> = ({
 }: {odr: OrderI, action: Function}) => {
 
     return(
-        <CardS onClick={() => action()}>
+        <CardS onClick={() => action()} status={ odr.status }>
             <CardTtlS>{`${odr.client.firstName} ${ odr.client.lastName }` }</CardTtlS>
-            <CardTxtItal>Building: {odr.building}</CardTxtItal>
-            <CardTxtItal>Unit: {odr.unit}</CardTxtItal>
-            <CardTxtItal>{ odr.status }</CardTxtItal>
+            <CardTxtItal>Building: <HighlightS>{odr.building}</HighlightS></CardTxtItal>
+            <CardTxtItal>Unit: <HighlightS>{odr.unit}</HighlightS></CardTxtItal>
+            <CardTxtItal><HighlightS>{ odr.status }</HighlightS></CardTxtItal>
         </CardS>
     )
 }
@@ -141,7 +177,7 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
             <ActiveOrdersS>
                 <HeadS>
                     <HeadTxtS>Active Orders</HeadTxtS>
-                    <HeadTxtS>Loading...</HeadTxtS>
+                    <SubHeadTxtS>Loading...</SubHeadTxtS>
                 </HeadS>
             </ActiveOrdersS>
         )
@@ -151,10 +187,11 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
         <ActiveOrdersS>
             <HeadS>
                 <HeadTxtS>Active Orders</HeadTxtS>
-                {!activeOrders.length && <HeadTxtS>No Orders</HeadTxtS>}
+                {!activeOrders.length && <SubHeadTxtS>No Orders</SubHeadTxtS>}
             </HeadS>
             <CardsCtnS>
-                {activeOrders.map(odr => <OrderCards 
+                {activeOrders.map(odr => 
+                    <OrderCards 
                         odr={ odr }
                         action={ () => onOrderPress(odr._id) }
                     />

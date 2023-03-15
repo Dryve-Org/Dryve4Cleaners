@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { desiredService, OrderI, ServiceI } from '../../interface/api'
-import { colors } from '../../styles/colors'
+import { colors, colorList } from '../../styles/colors'
 import { numToMoney } from '../../constants/money'
 import { device } from '../../styles/viewport'
 
@@ -9,7 +9,7 @@ const SerivcesCtnS = styled.section`
 `
 
 const ServicesHeadS = styled.div`
-    background-color: ${ colors.orange };
+    background-color: ${ colorList.a3  };
     padding: 15px;
 `
 
@@ -59,7 +59,8 @@ const CardPriceS = styled.p`
 
 const SvcCard = ({
     quantity,
-    service
+    service,
+    weight
 }: desiredService) => {
 
     return (
@@ -67,11 +68,12 @@ const SvcCard = ({
             <CardNameS>
                 { service.title }
             </CardNameS>
-            <CardPriceS>
-                { numToMoney(service.price) }
-            </CardPriceS>
             <CardQuantity>
-                Quantity: { quantity }
+                {
+                    service.perPound ?
+                    `Weight: ${ weight }` :
+                    `Quantity: ${ quantity }`
+                }
             </CardQuantity>
         </CardS>
     )
@@ -94,8 +96,8 @@ const RequestedServices: React.FC<RequestedServicesI> = ({
         <SerivcesCtnS>
             <ServicesHeadS>
                 <ServicesHeadTxtS>
-                    Desired Services (Total: { numToMoney(orderTotal) }
-                    {isUpdated ? '*' : ''})
+                    Desired Services
+                    {isUpdated ? ' (not saved)' : ''}
                 </ServicesHeadTxtS>
             </ServicesHeadS>
             <ServicesListS>

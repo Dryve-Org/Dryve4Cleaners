@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
 import { useGlobalContext } from '../../context/global'
-import { colors } from '../../styles/colors'
+import { colors, colorList } from '../../styles/colors'
 import { device } from '../../styles/viewport'
 
 
 const HeaderS = styled.section`
     height: 55px;
-    background-color: ${ colors.offGold };
-    color: ${ colors.black };
+    background-color: ${ colorList.a1 };
+    color: ${ colorList.w2 };
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -88,14 +88,14 @@ const LinkS = styled(Link)`
     width: fit-content;
     padding: 3px 9px;
     border-radius: 20px 20px;
-    border: 2px solid ${ colors.black };
+    border: 2px solid ${ colorList.w1 };
     font-weight: 700;
     font-size: 18px;
     text-decoration: underline;
-    color: ${ colors.secondaryOffGold };
+    color: ${ colorList.w3 };
 
     @media ${ device.desktop } {
-        color: ${ colors.black };
+        color: ${ colorList.w1 };
         text-decoration: none;
     }
 `
@@ -104,7 +104,7 @@ const NavBttnS = styled.div`
     position: absolute;
     right: 10px;
     z-index: 101;
-    color: ${ colors.orange };
+    color: ${ colorList.w1 };
     font-size: 25px;
     font-weight: 700;
 

@@ -1,50 +1,14 @@
 import styled from 'styled-components'
-import { colors } from '../../../styles/colors'
+import { colorList, colors } from '../../../styles/colors'
 import { device } from '../../../styles/viewport'
+import { BlockerS, WindowS } from './constants'
 
 interface TextActivityI {
     active: boolean
 }
 
-const BlockerS = styled.div<TextActivityI>`
-    position: absolute;
-    display: ${({ active }) => active ? 'block' : 'none'};
-    background-color: ${ colors.darkGrey };
-    opacity: .5;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 999;
-`
-
-const WindowS = styled.section<TextActivityI>`
-    display: ${({ active }) => active ? 'flex' : 'none'};
-    flex-direction: column;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-    width: 100%;
-    background-color: ${ colors.black };
-    height: 100%;
-    gap: 5em;
-    /* padding: 1em 0px; */
-
-    @media ${ device.tablet } { 
-        width: 500px;
-        height: 400px;
-        border: 3px solid ${ colors.orange };
-        border-radius: 10px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-`
-
 const HeaderCtnS = styled.div<TextActivityI>`
     display: ${({ active }) => active ? 'block' : 'none'};
-    color: ${ colors.orange };
     font-size: 24px;
     text-align: center;
 `
@@ -75,30 +39,33 @@ const BttnCtnS = styled.div`
 `
 
 const YesBttnS = styled.button`
-    border: 3px solid ${ colors.orange };
-    color: ${ colors.black };
-    background-color: ${ colors.orange };
+    border: 3px solid ${ colorList.a3 };
+    color: ${ colorList.w1 };
+    background-color: ${ colorList.a3 };
     border-radius: 20px;
     font-size: 24px;
     padding: 10px 1em;
-
+    
     &:hover {
-        border-color: ${ colors.black };
+        border-color: ${ colorList.c1 };
+        background-color: ${ colorList.c1 };
+        cursor: pointer;
     }
-
+    
     transition: .5s ease all;
 `
 
 const NoBttnS = styled.button`
-    border: 3px solid ${ colors.orange };
-    color: ${ colors.orange };
+    border: 3px solid ${ colorList.a3 };
+    color: ${ colorList.w1 };
     background-color: transparent;
     border-radius: 20px;
     font-size: 24px;
     padding: 10px 1em;
-
+    
     &:hover {
-        border-color: ${ colors.black };
+        border-color: ${ colorList.c1 };
+        cursor: pointer;
     }
 
     transition: .5s ease all;
@@ -136,6 +103,7 @@ const YayONay: React.FC<YayONayPopI> = ({
                         </HeaderTxtS>
                     </HeaderCtnS>
                 </WindowS> :
+                
                 <WindowS active={ display }>
                     <HeaderCtnS active={ head || subHead ? true : false }>
                         <HeaderTxtS active={ head ? true : false }>

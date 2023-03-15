@@ -4,7 +4,7 @@ import InputsHook, { ValuesI } from '../hook/inputs'
 import axios from 'axios'
 import { GlobalI, useGlobalContext } from '../context/global'
 import { useNavigate } from 'react-router-dom'
-import { colors } from '../styles/colors'
+import { colors, colorList } from '../styles/colors'
 
 const LoginS = styled.section`
     justify-content: center;
@@ -21,9 +21,15 @@ const LogoS = styled.div`
 `
 
 const LogoTxtS = styled.h1`
-    color: ${ colors.orange };
+    color: ${ colorList.a2 };
     font-size: 40px;
     text-align: center;
+    background-color: ${ colorList.w2 };
+    margin: 0px auto;
+    max-width: 500px;
+    border-radius: 25px;
+    padding: 10px 0px;
+    border: 4px solid ${ colorList.a1 };
 `
 
 const LoginContainer = styled.main`
@@ -31,11 +37,11 @@ const LoginContainer = styled.main`
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: white;
+    background-color: ${ colorList.w2 };
     text-align: center;
     width: 90%;
     border-radius: 20px;
-    border: 4px solid ${ colors.orange };
+    border: 4px solid ${ colorList.a1 };
     max-width: 500px;
 `
 
@@ -57,7 +63,7 @@ const LabelS = styled.label`
 `
 
 const TextInput = styled.input`
-    border: 2px solid ${ colors.darkGrey };
+    border: 2px solid ${ colorList.b1 };
     border-radius: 20px;
     height: 30px;
     font-size: 20px;

@@ -2,8 +2,8 @@ import { OrderI, OrderstatusT, ServiceI } from "../../interface/api"
 import styled from 'styled-components'
 import RequestedServices from "../container/RequestedServices"
 import { device } from "../../styles/viewport"
-import { colors } from "../../styles/colors"
-import EditServices from "../container/EditServices"
+import { colors, colorList } from "../../styles/colors"
+import EditServices from "../container/editServices/EditServices"
 import { useEffect, useState } from "react"
 import { approveOrder, clothesReady, clothesUnReady, getOrder, UpdateServices } from "../../constants/request"
 import { useGlobalContext } from "../../context/global"
@@ -13,6 +13,8 @@ import { findIndex } from 'lodash'
 import throttle from '@jcoreio/async-throttle'
 import YayONay from "../container/popups/YayONay"
 import useMainErrHandler from '../../hook/MainErrorHook'
+import GetWeightPop from "../container/popups/GetWeightPop"
+import GetWeighPopHook from "../../hook/GetWeightHook"
 
 //ODs = OrderDetails
 
@@ -37,6 +39,8 @@ const OrderDetailsS = styled.section<OrderDetailsSI>`
         right: initial;
         border-left: none;
         background-color: transparent;
+        height: 100%;
+        overflow: auto;
     }
     
 `
@@ -74,7 +78,13 @@ const BackBttnS = styled.button`
 
 const ODsHeadCtnS = styled.div`
     display: flex;
-    border-bottom: 2px solid black;
+    border: 2px solid ${ colorList.w1 };
+    background-color: ${ colorList.a1 };
+    margin: 1em auto;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    max-width: 600px;
 `
 
 const ODsHeadPartS = styled.div`
@@ -83,7 +93,7 @@ const ODsHeadPartS = styled.div`
 `
 
 const ODsHeadTxtS = styled.h3`
-    color: ${ colors.orange };
+    color: ${ colorList.w2 };
 `
 
 const ODsHeadNameS = styled.p`
@@ -108,10 +118,18 @@ const BttmBttnCtnS = styled.div`
 
 const UpdateBttnS = styled.button`
     padding: 1em;
-    background-color: ${ colors.orange };
-    border: 3px solid ${ colors.orange };
+    background-color: ${ colorList.a3 };
+    border: 3px solid ${ colorList.a1 };
     border-radius: 10px;
     font-weight: 800;
+    cursor: pointer;
+
+    &:hover {
+        background-color: transparent;
+        color: ${ colorList.a3 };
+    }
+
+    transition: ease all .25s;
 `
 
 const ReadyBttnS = styled.button`
@@ -121,10 +139,7 @@ const ReadyBttnS = styled.button`
     border: 3px solid ${ colors.orange };
     font-weight: 800;
     background-color: transparent;
-
-    &:hover {
-        cursor: pointer;
-    }
+    cursor: pointer;
 `
 
 const UnReadyBttnS = styled.button`
@@ -134,9 +149,9 @@ const UnReadyBttnS = styled.button`
     border: 3px solid ${ colors.orange };
     font-weight: 800;
     background-color: ${ colors.black };
+    cursor: pointer;
 
     &:hover {
-        cursor: pointer;
         border: 2px solid white;
     }
 `
@@ -154,12 +169,14 @@ interface OrderDetailsI {
     orderId: OrderI['_id'] | undefined
     back: Function
     setOrderUpdate: React.Dispatch<React.SetStateAction<boolean>>
+    cleaner: OrderI['cleaner'] | undefined
 }
 
 const OrderDetails: React.FC<OrderDetailsI> = ({
     orderId,
     back,
-    setOrderUpdate
+    setOrderUpdate,
+    cleaner
 }: OrderDetailsI) => {
     const [ order, setOrder ] = useState<OrderI>()
     const [ dServices, setDServices ] = useState<OrderI['desiredServices']>([])
@@ -171,6 +188,41 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
     const { token } = useOutletContext<TokenAndClnOutletI>()
     const { errorHandler } = useMainErrHandler()
 
+    const updateWeight = (weight: number) => {
+        if(!weightService) return
+
+        const index = findIndex(dServices, {
+            service: {
+                _id: weightService._id
+            }
+        })
+
+        if(index === -1) {
+            dServices.push({
+                quantity: 1,
+                weight: weight,
+                service: weightService,
+                _id: (dServices.length + 1).toString() 
+            })
+        } else {
+            dServices[index].weight = weight
+        }
+
+        setUpdatedSvcs(true)
+        setDServices([...dServices])
+
+        console.log(dServices)
+    }
+
+
+    const [
+        weightPop,
+        toggleWeightPop,
+        setWeightInput,
+        weightService,
+        weightInput
+    ] = GetWeighPopHook(updateWeight)
+
     const nav = useNavigate()
 
     useEffect(() => {
@@ -178,7 +230,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
 
         for(let svc of dServices) {
             const svcTotal = svc.quantity * svc.service.price
-            total+= svcTotal
+            total += svcTotal
         }
 
         setOrderTotal(total)
@@ -235,6 +287,23 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         )
     }
 
+    if(!cleaner) {
+        return(
+            <OrderDetailsS open={ order ? true : false }>
+                <BackBttnS
+                    onClick={() => back()}
+                >
+                    Back
+                </BackBttnS>
+                <ErrorS>
+                    <ErrorTxtS>
+                        Waiting for Cleaner Information
+                    </ErrorTxtS>
+                </ErrorS>
+            </OrderDetailsS>
+        )
+    }
+
     const handleAproval = async () => {
         try {
             if(!orderId) return
@@ -277,7 +346,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             dServices.push({
                 quantity: 1,
                 service,
-                _id: ''
+                _id: (dServices.length + 1).toString() 
             })
 
             setUpdatedSvcs(true)
@@ -299,18 +368,55 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             return
         }
 
+        console.table(dServices)
+
         UpdateServices(
             token,
             order._id,
             dServices
         )
         .then(res => {
-            console.log('success', res)
             setUpdatedSvcs(false)
         })
         .finally(() => {
             setOrderUpdate(true)
         })
+    }
+
+    const editWeight = (
+        serviceId: string,
+        weight: number,
+        service: ServiceI
+    ) => {
+        const index = findIndex(dServices, { 
+            service: {
+                _id: serviceId
+            }
+        })
+
+        if(!dServices[index].service.perPound) {
+            alert('This service is not priced by weight')
+            return
+        }
+
+        // add service if not found
+        if(index === -1) {
+            dServices.push({
+                quantity: 1,
+                weight,
+                service,
+                _id: (dServices.length + 1).toString() 
+            })
+
+            setUpdatedSvcs(true)
+            setDServices([...dServices])
+            return
+        }
+
+        dServices[index].weight = weight
+
+        setUpdatedSvcs(true)
+        setDServices([...dServices])
     }
 
     const handleReadyBttn = async () => {
@@ -358,7 +464,6 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         }
     }
 
-
     if(!orderId) return <></> 
 
     if(!order) return (
@@ -369,11 +474,10 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         </OrderDetailsS>
     )
 
-
     return (
         <>
             <YayONay 
-                display={approvalPop}
+                display={ approvalPop }
                 head="Do you accept this order?"
                 subHead="Yes makes you liable for this order" 
                 onYes={ handleAproval } 
@@ -383,6 +487,12 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                     } 
                 }
                 loading={ popLoading }
+            />
+            <GetWeightPop
+                display={ weightPop }
+                close={ toggleWeightPop }
+                submitWeight={ setWeightInput }
+                service={ weightService }
             />
             <OrderDetailsS open={ order ? true : false }>
                 {loading &&
@@ -397,9 +507,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 </BackBttnS>
                 <ODsHeadCtnS>
                     <ODsHeadPartS>
-                        <ODsHeadTxtS>
-                            Client
-                        </ODsHeadTxtS>
+                        <ODsHeadTxtS> Client </ODsHeadTxtS>
                         <ODsHeadNameS>
                             {`${ order.client.firstName } ${ order.client.lastName }`}
                         </ODsHeadNameS>
@@ -408,9 +516,19 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                         </ODsHeadPhnS>
                     </ODsHeadPartS>
                     <ODsHeadPartS>
-                        <ODsHeadTxtS>
-                            Driver
-                        </ODsHeadTxtS>
+                        <ODsHeadTxtS> Apartment </ODsHeadTxtS>
+                        <ODsHeadNameS>
+                            {`${ order.aptName }`}
+                        </ODsHeadNameS>
+                        <ODsHeadPhnS>
+                            {`buidling: ${ order.building }`}
+                        </ODsHeadPhnS>
+                        <ODsHeadPhnS>
+                            {`unit: ${ order.unit }`}
+                        </ODsHeadPhnS>
+                    </ODsHeadPartS>
+                    <ODsHeadPartS>
+                        <ODsHeadTxtS> Driver </ODsHeadTxtS>
                         <ODsHeadNameS>
                             {`${ order.pickUpDriver.user.firstName } ${ order.pickUpDriver.user.lastName }`}
                         </ODsHeadNameS>
@@ -425,21 +543,22 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                         orderTotal={ orderTotal }
                         isUpdated={ updatedSvcs }
                     />
-                    {order.status === 'Clothes Awaiting Pricing' &&
+                    { order.status !== 'Clothes Ready' &&
                         <EditServices 
-                            clnId={ order.cleaner._id }
+                            cleaner={ cleaner }
                             addSubSvc={ addSubSvc }
+                            toggleWeightPop={ toggleWeightPop }
                         />
                     }
                 </ODsBodyS>
                 <BttmBttnCtnS>
                     {
-                        updatedSvcs && <UpdateBttnS onClick={() => update()}>
+                        order.status !== 'Clothes Ready' && <UpdateBttnS onClick={() => update()}>
                             Update
                         </UpdateBttnS>
                     }
                     {
-                        dServices.length && order?.status === 'Clothes Being Cleaned' && !updatedSvcs ? 
+                        dServices.length && order.status === 'Clothes Being Cleaned' && !updatedSvcs ? 
                         <ReadyBttnS onClick={() => handleReadyBttn()}>
                             Ready For Pickup
                         </ReadyBttnS>

@@ -7,7 +7,7 @@ import { useGlobalContext } from '../context/global'
 import useMainErrHandler from '../hook/MainErrorHook'
 import { CleanerI } from '../interface/api'
 import { Token } from '../interface/general'
-import { colors } from '../styles/colors'
+import { colors, colorList } from '../styles/colors'
 
 const ChooseClnS = styled.section`
 `
@@ -23,7 +23,7 @@ const HeaderCtnS = styled.div`
 const Header = styled.h2`
     text-align: center;
     font-size: 30px;
-    color: ${ colors.orange };
+    color: ${ colorList.a3 };
 `
 
 const CardsCtnS = styled.section`
@@ -43,6 +43,7 @@ const CardS = styled.div`
     font-weight: 500;
     padding: 15px 0;
     border: 1px solid black;
+    cursor: pointer;
 
     &:hover {
         background-color: beige;
@@ -50,8 +51,7 @@ const CardS = styled.div`
 `
 
 const CardTtlS = styled.p`
-    font-size: 20px;
-    
+    font-size: 20px; 
 `
 
 const CardPhn = styled.p`

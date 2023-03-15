@@ -132,6 +132,29 @@ export const getServices = async (
     }
 }
 
+/**
+ * Getting cleaner information
+ * @param {string} token - string - the token that is used to authenticate the user
+ * @param {string} clnId - string - the cleaner id
+ * @returns An object of type CleanerI
+*/
+export const getCleaner = async (
+    token: string,
+    clnId: string,
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const cleaner = await api(token, errorHandler)
+            .get<CleanerI>(`/cleanerPro/cleaner/${ clnId }`)
+            .then(res => res.data)
+
+        return cleaner
+    } catch(e) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+}
+
 export const UpdateServices = async (
     token: string,
     orderId: OrderI['_id'],
@@ -141,7 +164,8 @@ export const UpdateServices = async (
     try {
         const formattedDS = desiredServices.map(ds => ({
             service: ds.service._id,
-            quantity: ds.quantity
+            quantity: ds.quantity,
+            weight: ds.weight
         }))
 
         const update = await api(token, errorHandler)
