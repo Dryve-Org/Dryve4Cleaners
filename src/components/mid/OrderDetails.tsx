@@ -12,6 +12,7 @@ import { TokenAndClnOutletI } from "../TokenAndCln"
 import { findIndex } from 'lodash'
 import throttle from '@jcoreio/async-throttle'
 import YayONay from "../container/popups/YayONay"
+import MachineList from "../container/popups/MachineList"
 import useMainErrHandler from '../../hook/MainErrorHook'
 import GetWeightPop from "../container/popups/GetWeightPop"
 import GetWeighPopHook from "../../hook/GetWeightHook"
@@ -63,13 +64,13 @@ const BackBttnS = styled.button`
     margin: 1em 20px;
     width: 60px;
     height: 40px;
-    background-color: ${ colors.black };
+    background-color: ${ colorList.b1 };
     font-weight: 500;
     font-size: 18px;
     color: white;
     outline: 0;
     border-radius: 10px;
-    border: 2px solid ${ colors.orange };
+    border: 2px solid ${ colorList.a3 };
 
     @media ${ device.desktop } {
         display: none;
@@ -183,6 +184,8 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
     const [ orderTotal, setOrderTotal ] = useState<OrderI['orderTotal']>()
     const [ updatedSvcs, setUpdatedSvcs ] = useState<boolean>(false)
     const [ approvalPop, setApprovalPop ] = useState<boolean>(false)
+    //machines list
+    const [ machList, setMachList ] = useState<boolean>(true)
     const [ loading, setLoading ] = useState<boolean>(false)
     const [ popLoading, setPopLoading ] = useState<boolean>(false)
     const { token } = useOutletContext<TokenAndClnOutletI>()
@@ -383,42 +386,6 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         })
     }
 
-    const editWeight = (
-        serviceId: string,
-        weight: number,
-        service: ServiceI
-    ) => {
-        const index = findIndex(dServices, { 
-            service: {
-                _id: serviceId
-            }
-        })
-
-        if(!dServices[index].service.perPound) {
-            alert('This service is not priced by weight')
-            return
-        }
-
-        // add service if not found
-        if(index === -1) {
-            dServices.push({
-                quantity: 1,
-                weight,
-                service,
-                _id: (dServices.length + 1).toString() 
-            })
-
-            setUpdatedSvcs(true)
-            setDServices([...dServices])
-            return
-        }
-
-        dServices[index].weight = weight
-
-        setUpdatedSvcs(true)
-        setDServices([...dServices])
-    }
-
     const handleReadyBttn = async () => {
         try {
             if(!dServices.length || !order) return
@@ -488,6 +455,11 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 }
                 loading={ popLoading }
             />
+            <MachineList
+                display={ machList }
+                close={ () => setMachList(false) }
+                machines={ cleaner.machines }
+            />
             <GetWeightPop
                 display={ weightPop }
                 close={ toggleWeightPop }
@@ -507,24 +479,20 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 </BackBttnS>
                 <ODsHeadCtnS>
                     <ODsHeadPartS>
+                        <ODsHeadTxtS> Apartment Id </ODsHeadTxtS>
+                        <ODsHeadNameS>
+                            { order.unitId }
+                        </ODsHeadNameS>
+                    </ODsHeadPartS>
+                </ODsHeadCtnS>
+                <ODsHeadCtnS>
+                    <ODsHeadPartS>
                         <ODsHeadTxtS> Client </ODsHeadTxtS>
                         <ODsHeadNameS>
                             {`${ order.client.firstName } ${ order.client.lastName }`}
                         </ODsHeadNameS>
                         <ODsHeadPhnS>
                             {`${ order.client.phoneNumber }`}
-                        </ODsHeadPhnS>
-                    </ODsHeadPartS>
-                    <ODsHeadPartS>
-                        <ODsHeadTxtS> Apartment </ODsHeadTxtS>
-                        <ODsHeadNameS>
-                            {`${ order.aptName }`}
-                        </ODsHeadNameS>
-                        <ODsHeadPhnS>
-                            {`buidling: ${ order.building }`}
-                        </ODsHeadPhnS>
-                        <ODsHeadPhnS>
-                            {`unit: ${ order.unit }`}
                         </ODsHeadPhnS>
                     </ODsHeadPartS>
                     <ODsHeadPartS>

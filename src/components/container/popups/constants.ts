@@ -48,6 +48,24 @@ export const BlockerS = styled.div<ActivityI>`
     z-index: 999;
 `
 
+export const ExitCntS = styled.button`
+    display: block;
+    position: absolute;
+    top: 10;
+    right: 0;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    cursor: pointer;
+`
+
+export const ExitSvgS = styled.img.attrs({
+    src: '/images/exit.svg'
+})`
+    width: 30px;
+    height: 30px;
+`
+
 export const YesBttnS = styled.button`
     border: 3px solid ${ colorList.a3 };
     color: ${ colorList.w1 };

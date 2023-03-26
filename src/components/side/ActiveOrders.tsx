@@ -121,7 +121,7 @@ const OrderCards: React.FC<{odr: OrderI, action: Function}> = ({
 
     return(
         <CardS onClick={() => action()} status={ odr.status }>
-            <CardTtlS>{`${odr.client.firstName} ${ odr.client.lastName }` }</CardTtlS>
+            <CardTtlS>{`${ odr.client.firstName } ${ odr.client.lastName }` }</CardTtlS>
             <CardTxtItal>Building: <HighlightS>{odr.building}</HighlightS></CardTxtItal>
             <CardTxtItal>Unit: <HighlightS>{odr.unit}</HighlightS></CardTxtItal>
             <CardTxtItal><HighlightS>{ odr.status }</HighlightS></CardTxtItal>
