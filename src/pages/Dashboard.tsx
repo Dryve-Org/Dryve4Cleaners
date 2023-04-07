@@ -44,6 +44,7 @@ const Dashboard = () => {
                 onOrderPress={ retreiveOrder }
                 orderUpdate={ orderUpdate }
                 setOrderUpdate={ setOrderUpdate }
+                cleaner={ cleaner }
             />
             <OrderDetails 
                 orderId={ chosenOdr }

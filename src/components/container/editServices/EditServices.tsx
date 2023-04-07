@@ -129,6 +129,7 @@ const EditServices: React.FC<EditServicesI> = ({
                 { services.map(svc => !svc.perPound && <ServiceCard 
                             service={ svc }
                             addSubSvc={ addSubSvc }
+                            key={ svc._id }
                         />
                     ) 
                 }

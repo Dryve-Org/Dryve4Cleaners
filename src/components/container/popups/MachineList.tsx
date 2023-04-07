@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router"
 import styled from "styled-components"
 import { unixToDate } from "../../../constants/time"
 import { MachineI } from "../../../interface/api"
@@ -28,7 +29,7 @@ const BodyCtnS = styled.div`
     margin: 0 1em;
 `
 
-const MachineCardS = styled.div<{ status: MachineI['status'] }>`
+const MachineCardS = styled.button<{ status: MachineI['status'] }>`
     display: grid;
     justify-content: space-around;
     word-break: break-word;
@@ -51,6 +52,7 @@ const MachineCardS = styled.div<{ status: MachineI['status'] }>`
             case 'In Use':
                 return `
                     border: 3px solid ${ colorList.a3 };
+                    color: ${ colorList.w1 };
                 `
             case 'Out of Order':
                 return `
@@ -80,13 +82,18 @@ const LastUpdatedS = styled.p``
 
 
 const MachineCard = ({
-    machine
+    machine,
+    handleMachineClick
 }: {
     machine: MachineI
+    handleMachineClick: (machine: MachineI) => void
 }) => {
 
     return(
-        <MachineCardS status={ machine.status }>
+        <MachineCardS 
+            status={ machine.status }
+            onClick={ () => handleMachineClick(machine) }
+        >
             <MachineIdS>{ machine.machineId }</MachineIdS>
             <MachineStatusS>{ machine.status }</MachineStatusS>
             <MachineUnitS>{ machine.attachedUnitId }</MachineUnitS>
@@ -105,6 +112,12 @@ const MachineList: React.FC<MachineListI> = ({
     machines,
     close
 }) => {
+    const nav = useNavigate()
+
+    const handleMachineClick = (machine: MachineI): void => {
+        nav(`/dashboard/${ machine.attachedOrder }`)
+        close()
+    }
 
     return(
         <>
@@ -118,7 +131,11 @@ const MachineList: React.FC<MachineListI> = ({
                 </HeaderCtnS>
                 <BodyCtnS>
                     { machines.map((machine, i) => (
-                        <MachineCard key={ i } machine={ machine } />
+                        <MachineCard 
+                            key={ i } 
+                            machine={ machine } 
+                            handleMachineClick={ handleMachineClick }
+                        />
                     )) }
                 </BodyCtnS>
             </PopWindowS>

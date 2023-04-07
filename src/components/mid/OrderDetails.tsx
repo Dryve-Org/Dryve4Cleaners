@@ -1,11 +1,11 @@
-import { OrderI, OrderstatusT, ServiceI } from "../../interface/api"
+import { MachineI, OrderI, OrderstatusT, ServiceI } from "../../interface/api"
 import styled from 'styled-components'
 import RequestedServices from "../container/RequestedServices"
 import { device } from "../../styles/viewport"
 import { colors, colorList } from "../../styles/colors"
 import EditServices from "../container/editServices/EditServices"
 import { useEffect, useState } from "react"
-import { approveOrder, clothesReady, clothesUnReady, getOrder, UpdateServices } from "../../constants/request"
+import { approveOrder, assignMachine, clothesReady, clothesUnReady, getOrder, UpdateServices } from "../../constants/request"
 import { useGlobalContext } from "../../context/global"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { TokenAndClnOutletI } from "../TokenAndCln"
@@ -16,6 +16,7 @@ import MachineList from "../container/popups/MachineList"
 import useMainErrHandler from '../../hook/MainErrorHook'
 import GetWeightPop from "../container/popups/GetWeightPop"
 import GetWeighPopHook from "../../hook/GetWeightHook"
+import AssignMachine from "../container/popups/AssignMachine"
 
 //ODs = OrderDetails
 
@@ -24,7 +25,7 @@ interface OrderDetailsSI {
 }
 
 const OrderDetailsS = styled.section<OrderDetailsSI>`
-    position: fixed;
+    position: absolute;
     z-index: 10;
     background-color: ${colors.darkGrey };
     top: 0;
@@ -34,8 +35,9 @@ const OrderDetailsS = styled.section<OrderDetailsSI>`
     transition: all ease 1s;
     border-left: 3px solid ${ colors.orange };
     transition: 1s ease all;
-
+    
     @media ${ device.desktop } {
+        position: fixed;
         position: relative;
         right: initial;
         border-left: none;
@@ -78,19 +80,118 @@ const BackBttnS = styled.button`
 `
 
 const ODsHeadCtnS = styled.div`
-    display: flex;
-    border: 2px solid ${ colorList.w1 };
-    background-color: ${ colorList.a1 };
-    margin: 1em auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    border: 2px solid ${ colorList.a3 };
+    gap: .5em;
+    /* background-color: ${ colorList.a1 }; */
+    margin: 1em;
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 20px;
     max-width: 600px;
+    box-shadow: 0 0 10px 0 ${ colorList.a3 }80;
+
+    @media ${ device.desktop } {
+        justify-content: center;
+        max-width: 100%;
+        margin: 1em 1em;
+        grid-template-columns: 1fr 1fr 1fr;
+        max-width: 800px;
+        margin: 1em auto;
+    }
 `
 
 const ODsHeadPartS = styled.div`
     width: 100%;
     text-align: center;
+    border-right: 2px solid ${ colorList.a3 };
+`
+
+const ODsHeadUnitIdPartS = styled(ODsHeadPartS)`
+    border-right: none;
+
+    @media ${ device.desktop } {
+        border-right: 2px solid ${ colorList.a3 };
+    }
+`
+
+const ODsAssignMachCtnS = styled(ODsHeadPartS)`
+    grid-column-start: 1;
+    grid-column-end: 3;
+    border-right: none;
+
+    @media ${ device.desktop } {
+        grid-column-start: auto;
+        grid-column-end: auto;
+    }
+`
+
+const ActionCtnS = styled.div`
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 1em;
+`
+
+const ActionBttnS = styled.button`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: .5em;
+    border-radius: 5px;
+    background-color: transparent;
+    outline: none;
+    padding: 1em;
+    height: 70px;
+    width: 150px;
+    cursor: pointer;
+
+    &:hover {
+        transform: scale(1.1);
+        filter: brightness(1.2);
+    }
+    transition: all ease .5s;
+`
+
+const ActionRmvMachBttnS = styled(ActionBttnS)`
+    border: 2px solid ${ colorList.e1 };
+    color: ${ colorList.e1 };
+    box-shadow: 0 0 10px 0 ${ colorList.e1 }80;
+    padding: 1em .25em;
+`
+
+const ActionAddMachBttnS = styled(ActionBttnS)`
+    border: 2px solid ${ colorList.c1 };
+    color: ${ colorList.c1 };
+    box-shadow: 0 0 10px 0 ${ colorList.c1 }80;
+`
+
+const ActionBttnTxtS = styled.p`
+    color: inherit;
+    font-weight: bolder;
+    word-break: break-word;
+`
+
+const AddWasherSvgS = styled.img.attrs({
+    src: '/images/addWasher.svg'
+})`
+    width: 30px;
+    height: 30px;
+`
+
+const OpenMachineSvgS = styled.img.attrs({
+    src: '/images/openedWasher.svg'
+})`
+    width: 30px;
+    height: 30px;
+`
+
+const ODsHeadPartClientS = styled(ODsHeadPartS)`
+    border-right: 2px solid ${ colorList.a3 };
 `
 
 const ODsHeadTxtS = styled.h3`
@@ -184,8 +285,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
     const [ orderTotal, setOrderTotal ] = useState<OrderI['orderTotal']>()
     const [ updatedSvcs, setUpdatedSvcs ] = useState<boolean>(false)
     const [ approvalPop, setApprovalPop ] = useState<boolean>(false)
-    //machines list
-    const [ machList, setMachList ] = useState<boolean>(true)
+    const [ assignMachinePop, setAssignMachinePop ] = useState<boolean>(false)
     const [ loading, setLoading ] = useState<boolean>(false)
     const [ popLoading, setPopLoading ] = useState<boolean>(false)
     const { token } = useOutletContext<TokenAndClnOutletI>()
@@ -307,6 +407,39 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         )
     }
 
+    const handleAssignMachine = async (machineId: MachineI['machineId']): Promise<boolean> => {
+        try {
+            if(!orderId) return false
+            setPopLoading(true)
+
+            const order = await assignMachine(token, 
+                orderId, 
+                machineId, 
+                (e) => console.log('this error happend', e)
+            )
+            if(!order) return false
+
+            setOrder(order)
+            return true
+        } catch {
+            alert(
+                'Something went wrong. Please try again or contact a Gourmade Laudry Representative.'
+            )
+
+            return false
+        } finally {
+            setPopLoading(true)
+        }
+    }
+
+    /**
+     * This function handles the approval of an order and updates the order state.
+     * @returns It is not clear what is being returned as the code snippet only shows a function
+     * definition. The function `handleApproval` is defined as an asynchronous function that tries to
+     * approve an order using the `approveOrder` function with the provided `token` and `orderId`. If
+     * successful, it sets the `order` state with the returned order object. If there is an error, it
+     * displays an alert message
+    */
     const handleAproval = async () => {
         try {
             if(!orderId) return
@@ -324,6 +457,13 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         }
     }
 
+    /**
+     * Adds or subtracts a service from the order
+     * @param serviceId 
+     * @param subtract - true if you want to subtract a service
+     * @param service 
+     * @returns 
+    */
     const addSubSvc = (
         serviceId: string,
         subtract: boolean,
@@ -364,6 +504,13 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         setDServices([...dServices])
     }
 
+    /**
+     * This function updates the services for an order if it has not been paid for yet.
+     * @returns It depends on the conditions in the code. If either `order` or `dServices` is falsy,
+     * the function will return without doing anything. If `order.orderPaidfor` is truthy, an alert
+     * will be shown and the function will return. Otherwise, the function will call `UpdateServices`
+     * with `token`, `order._id`, and `dServices` as arguments,
+    */
     const update = () => {
         if(!order || !dServices.length) return
         if(order.orderPaidfor) {
@@ -384,23 +531,41 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         .finally(() => {
             setOrderUpdate(true)
         })
-    }
+    } 
 
+    /**
+     * This function handles the click event of a button to mark an order as ready and updates the
+     * order status accordingly.
+     * @returns It depends on the conditions in the code. If either `dServices` or `order` is falsy,
+     * the function will return nothing. If `assignedMachines` has a length greater than 0, the
+     * function will return nothing after displaying an alert message. Otherwise, the function will
+     * call the `clothesReady` function and update the state variables `order` and `updatedSv
+    */
     const handleReadyBttn = async () => {
         try {
             if(!dServices.length || !order) return
+            const assignedMachines = cleaner.machines.filter(mach => {
+                return mach.attachedOrder?.includes(order._id)
+            })
+
+            if(assignedMachines.length) {
+                const listMachines = assignedMachines.map(mach => mach.machineId).join(', ')
+                alert(`Order ${order.unitId} must be removed from machine(s) ${listMachines}`)
+                return
+            }
+
             setLoading(true)
         
             const updatedOrder = await clothesReady(
                 token,
                 order._id
             )
-
+            
             if(!updatedOrder) return
 
             setOrder(updatedOrder)
             setUpdatedSvcs(false)
-        } catch(e) {
+        } catch(e: any) {
             console.error(e)
         } finally {
             setLoading(false)
@@ -409,6 +574,14 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             
     }
 
+    /**
+     * This function handles the action of marking an order as unready for clothes.
+     * @returns If the order status is not 'Clothes Ready', the function will return without doing
+     * anything. If the clothesUnReady function does not return an updated order, the function will
+     * also return without doing anything. Otherwise, the function will update the order state with the
+     * updated order and set the orderUpdate state to true. Finally, the function will set the loading
+     * state to false.
+    */
     const handleUnreadyBttn = async () => {
         try {
             if(order?.status !== 'Clothes Ready') return
@@ -441,6 +614,13 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         </OrderDetailsS>
     )
 
+    /*
+        find machines order is assigned to
+    */
+    const assignedMachines = cleaner.machines.filter(mach => {
+        return mach.attachedOrder?.includes(order._id)
+    })
+
     return (
         <>
             <YayONay 
@@ -455,10 +635,12 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 }
                 loading={ popLoading }
             />
-            <MachineList
-                display={ machList }
-                close={ () => setMachList(false) }
-                machines={ cleaner.machines }
+            <AssignMachine 
+                display={ assignMachinePop }
+                close={ () => setAssignMachinePop(false) }
+                order={ order }
+                machineList={ cleaner.machines }
+                onSubmit={ handleAssignMachine }
             />
             <GetWeightPop
                 display={ weightPop }
@@ -478,33 +660,37 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                     Back
                 </BackBttnS>
                 <ODsHeadCtnS>
-                    <ODsHeadPartS>
-                        <ODsHeadTxtS> Apartment Id </ODsHeadTxtS>
-                        <ODsHeadNameS>
-                            { order.unitId }
-                        </ODsHeadNameS>
-                    </ODsHeadPartS>
-                </ODsHeadCtnS>
-                <ODsHeadCtnS>
-                    <ODsHeadPartS>
-                        <ODsHeadTxtS> Client </ODsHeadTxtS>
+                    <ODsHeadPartClientS>
                         <ODsHeadNameS>
                             {`${ order.client.firstName } ${ order.client.lastName }`}
                         </ODsHeadNameS>
                         <ODsHeadPhnS>
                             {`${ order.client.phoneNumber }`}
                         </ODsHeadPhnS>
-                    </ODsHeadPartS>
-                    <ODsHeadPartS>
-                        <ODsHeadTxtS> Driver </ODsHeadTxtS>
-                        <ODsHeadNameS>
-                            {`${ order.pickUpDriver.user.firstName } ${ order.pickUpDriver.user.lastName }`}
-                        </ODsHeadNameS>
+                    </ODsHeadPartClientS>
+                    <ODsHeadUnitIdPartS>
+                        <ODsHeadNameS> Unit Id </ODsHeadNameS>
                         <ODsHeadPhnS>
-                            {`${ order.pickUpDriver.user.phoneNumber }`}
+                            { order.unitId }
                         </ODsHeadPhnS>
-                    </ODsHeadPartS>
+                    </ODsHeadUnitIdPartS>
+                    <ODsAssignMachCtnS>
+                        <ODsHeadNameS> Assigned Machines </ODsHeadNameS>
+                        <ODsHeadPhnS>
+                        { assignedMachines.length ? assignedMachines.map(mach => mach.machineId).join(', ') : 'None' }
+                        </ODsHeadPhnS>
+                    </ODsAssignMachCtnS>
                 </ODsHeadCtnS>
+                <ActionCtnS>
+                    <ActionRmvMachBttnS>
+                        <ActionBttnTxtS>Assigend Machines</ActionBttnTxtS>
+                        <OpenMachineSvgS />
+                    </ActionRmvMachBttnS>
+                    <ActionAddMachBttnS onClick={() => setAssignMachinePop(true)}>
+                        <ActionBttnTxtS>Add Machine</ActionBttnTxtS>
+                        <AddWasherSvgS />
+                    </ActionAddMachBttnS>
+                </ActionCtnS>
                 <ODsBodyS>
                     <RequestedServices 
                         desiredServices={ dServices }
@@ -516,6 +702,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                             cleaner={ cleaner }
                             addSubSvc={ addSubSvc }
                             toggleWeightPop={ toggleWeightPop }
+                            key={ order._id }
                         />
                     }
                 </ODsBodyS>
