@@ -5,12 +5,13 @@ import { numToMoney } from '../../constants/money'
 import { device } from '../../styles/viewport'
 
 const SerivcesCtnS = styled.section`
-    
+    /* border: 2px solid ${ colorList.a3 }; */
 `
 
 const ServicesHeadS = styled.div`
-    background-color: ${ colorList.a3  };
+    border-bottom: 2px solid ${ colorList.a3 };
     padding: 15px;
+    color: ${ colorList.a3 };
 `
 
 const ServicesHeadTxtS = styled.h3`
@@ -25,21 +26,27 @@ const ServicesListS = styled.div`
     gap: 1em;
 
     @media ${ device.desktop } {
-        justify-content: center;
+        /* justify-content: center; */
     }
 `
 
 const CardS = styled.div`
-    background-color: ${ colors.offGold };
+    /* background-color: ${ colorList.a3 }; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
     width: 100%;
     padding: 10px;
     border-radius: 20px;
     text-align: center;
-    border: 2px solid ${ colors.offGold };
+    border: 2px solid ${ colorList.c1 };
+    box-shadow: 0 0 10px 1px ${ colorList.c1 }80;
     min-width: 200px;
     max-width: 350px;
-    color: ${ colors.black };
+    color: ${ colorList.a3};
     margin-bottom: 1em;
+    max-width: 200px;
 `
 
 const CardNameS = styled.p`

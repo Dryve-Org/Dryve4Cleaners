@@ -25,6 +25,18 @@ const Dashboard = () => {
     const params = useParams<{ orderId: string }>()
     const nav = useNavigate()
     const { global } = useGlobalContext()
+
+    const handleGetCleaner = async () => {
+        try {
+            const cleaner = await getCleaner(global.token, global.cleanerId)
+            if(!cleaner) alert('Cleaner not found')
+            
+            setCleaner(cleaner)
+        } catch (err) {
+            alert('Error getting cleaner')
+            console.log(err)
+        }
+    }
     
     useEffect(() => {
         setChosenOdr(params.orderId)
@@ -51,6 +63,7 @@ const Dashboard = () => {
                 back={ () => nav('') }
                 setOrderUpdate={ setOrderUpdate }
                 cleaner={ cleaner }
+                getCleaner={ handleGetCleaner }
             />
         </DashboardS>
     )

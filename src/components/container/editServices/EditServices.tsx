@@ -15,8 +15,9 @@ const EditServiceCtnS = styled.section`
 `
 
 const EditServiceHeadS = styled.div`
-    background-color: ${ colorList.a3 };
+    border-bottom: 2px solid ${ colorList.a3 };
     padding: 15px;
+    color: ${ colorList.a3 };
 `
 
 const EditServiceHeadTxtS = styled.h3`

@@ -203,6 +203,26 @@ export const assignMachine = async (
     }
 }
 
+export const unAssignedMachine = async (
+    token: string,
+    orderId: OrderI['_id'],
+    machineId: MachineI['machineId'],
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const update = await api(token, errorHandler)
+            .post<OrderI>(
+                `/cleanerPro/order/${orderId}/remove_from_machine/${machineId}`,
+            )
+            .then(res => res.data)
+
+        return update
+    } catch(e: any) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+}
+
 
 
 export const clothesReady = async (

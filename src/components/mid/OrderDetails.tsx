@@ -1,11 +1,11 @@
-import { MachineI, OrderI, OrderstatusT, ServiceI } from "../../interface/api"
+import { CleanerI, MachineI, OrderI, OrderstatusT, ServiceI } from "../../interface/api"
 import styled from 'styled-components'
 import RequestedServices from "../container/RequestedServices"
 import { device } from "../../styles/viewport"
 import { colors, colorList } from "../../styles/colors"
 import EditServices from "../container/editServices/EditServices"
 import { useEffect, useState } from "react"
-import { approveOrder, assignMachine, clothesReady, clothesUnReady, getOrder, UpdateServices } from "../../constants/request"
+import { approveOrder, assignMachine, clothesReady, clothesUnReady, getOrder, unAssignedMachine, UpdateServices } from "../../constants/request"
 import { useGlobalContext } from "../../context/global"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { TokenAndClnOutletI } from "../TokenAndCln"
@@ -17,6 +17,7 @@ import useMainErrHandler from '../../hook/MainErrorHook'
 import GetWeightPop from "../container/popups/GetWeightPop"
 import GetWeighPopHook from "../../hook/GetWeightHook"
 import AssignMachine from "../container/popups/AssignMachine"
+import AssignedMachines from "../container/popups/AssignedMachine"
 
 //ODs = OrderDetails
 
@@ -86,7 +87,7 @@ const ODsHeadCtnS = styled.div`
     border: 2px solid ${ colorList.a3 };
     gap: .5em;
     /* background-color: ${ colorList.a1 }; */
-    margin: 1em;
+    margin: 1em auto;
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 20px;
@@ -272,13 +273,15 @@ interface OrderDetailsI {
     back: Function
     setOrderUpdate: React.Dispatch<React.SetStateAction<boolean>>
     cleaner: OrderI['cleaner'] | undefined
+    getCleaner: () => void
 }
 
 const OrderDetails: React.FC<OrderDetailsI> = ({
     orderId,
     back,
     setOrderUpdate,
-    cleaner
+    cleaner,
+    getCleaner
 }: OrderDetailsI) => {
     const [ order, setOrder ] = useState<OrderI>()
     const [ dServices, setDServices ] = useState<OrderI['desiredServices']>([])
@@ -286,6 +289,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
     const [ updatedSvcs, setUpdatedSvcs ] = useState<boolean>(false)
     const [ approvalPop, setApprovalPop ] = useState<boolean>(false)
     const [ assignMachinePop, setAssignMachinePop ] = useState<boolean>(false)
+    const [ assignedMachinesPop, setAssignedMachinesPop ] = useState<boolean>(false)
     const [ loading, setLoading ] = useState<boolean>(false)
     const [ popLoading, setPopLoading ] = useState<boolean>(false)
     const { token } = useOutletContext<TokenAndClnOutletI>()
@@ -420,6 +424,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             if(!order) return false
 
             setOrder(order)
+            await getCleaner()
             return true
         } catch {
             alert(
@@ -428,7 +433,29 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
 
             return false
         } finally {
+            setPopLoading(false)
+        }
+    }
+
+    const handleUnassignMachine = async (machineId: MachineI['machineId']): Promise<boolean> => {
+        try {
+            if(!orderId) return false
             setPopLoading(true)
+            
+            const order = await unAssignedMachine(token, orderId, machineId)
+            if(!order) return false
+
+            setOrder(order)
+            await getCleaner()
+            return true
+        } catch {
+            alert(
+                'Something went wrong. Please try again or contact a Gourmade Laudry Representative.'
+            )
+
+            return false
+        } finally {
+            setPopLoading(false)
         }
     }
 
@@ -614,8 +641,8 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
         </OrderDetailsS>
     )
 
-    /*
-        find machines order is assigned to
+    /**
+     * This variable holds an array of machines that are assigned to the order.
     */
     const assignedMachines = cleaner.machines.filter(mach => {
         return mach.attachedOrder?.includes(order._id)
@@ -635,6 +662,14 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 }
                 loading={ popLoading }
             />
+            <AssignedMachines 
+                display={ assignedMachinesPop }
+                close={ () => setAssignedMachinesPop(false) }
+                machines={ assignedMachines }
+                order={ order }
+                onRemove={ handleUnassignMachine }
+                loading={ popLoading }
+            />
             <AssignMachine 
                 display={ assignMachinePop }
                 close={ () => setAssignMachinePop(false) }
@@ -648,7 +683,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                 submitWeight={ setWeightInput }
                 service={ weightService }
             />
-            <OrderDetailsS open={ order ? true : false }>
+            <OrderDetailsS open={ !!order }>
                 {loading &&
                     <LoadingS>
                         <p>loading...</p>
@@ -682,7 +717,7 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
                     </ODsAssignMachCtnS>
                 </ODsHeadCtnS>
                 <ActionCtnS>
-                    <ActionRmvMachBttnS>
+                    <ActionRmvMachBttnS onClick={ () => setAssignedMachinesPop(true) }>
                         <ActionBttnTxtS>Assigend Machines</ActionBttnTxtS>
                         <OpenMachineSvgS />
                     </ActionRmvMachBttnS>

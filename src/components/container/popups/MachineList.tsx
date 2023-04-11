@@ -3,7 +3,7 @@ import styled from "styled-components"
 import { unixToDate } from "../../../constants/time"
 import { MachineI } from "../../../interface/api"
 import { colorList } from "../../../styles/colors"
-import { ActivityI, BlockerS, ExitCntS, ExitSvgS, NoBttnS, PopupI, WindowS, YesBttnS } from './constants'
+import { ActivityI, BlockerS, ExitCntS, ExitSvgS, PopupI, WindowS } from './constants'
 
 
 const PopBlockerS = styled(BlockerS)``
@@ -41,6 +41,7 @@ const MachineCardS = styled.button<{ status: MachineI['status'] }>`
     border-radius: 5px;
     padding: 3px;
     text-align: center;
+    color: ${ colorList.w1 };
     cursor: pointer;
     
     ${({ status }) => {
@@ -52,7 +53,6 @@ const MachineCardS = styled.button<{ status: MachineI['status'] }>`
             case 'In Use':
                 return `
                     border: 3px solid ${ colorList.a3 };
-                    color: ${ colorList.w1 };
                 `
             case 'Out of Order':
                 return `
@@ -78,7 +78,6 @@ const MachineUnitS = styled.p`
     flex: 2;
     width: 100%;
 `
-const LastUpdatedS = styled.p``
 
 
 const MachineCard = ({

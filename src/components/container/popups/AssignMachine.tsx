@@ -354,7 +354,15 @@ const AssignMachine: React.FC<AssignMachineI> = ({
 
         const isSuccess = await onSubmit(machineInput)
 
-        if(isSuccess) close()
+        if(isSuccess) {
+            close()
+            setMachineInput(machineInput.split('-')[0] + '-')
+            setFilteredMachineList(
+                machineList.filter(machine => (
+                    machine.type === 'dryer' && machine.status === 'Available'
+                ))
+            )
+        }
     }
 
 

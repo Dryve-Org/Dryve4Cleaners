@@ -142,8 +142,9 @@ const OrderCards: React.FC<{odr: OrderI, action: Function}> = ({
     return(
         <CardS onClick={() => action()} status={ odr.status }>
             <CardTtlS>{`${ odr.client.firstName } ${ odr.client.lastName }` }</CardTtlS>
-            <CardTxtItal>Building: <HighlightS>{odr.building}</HighlightS></CardTxtItal>
-            <CardTxtItal>Unit: <HighlightS>{odr.unit}</HighlightS></CardTxtItal>
+            {/* <CardTxtItal>Building: <HighlightS>{odr.building}</HighlightS></CardTxtItal>
+            <CardTxtItal>Unit: <HighlightS>{odr.unit}</HighlightS></CardTxtItal> */}
+            <CardTxtItal>Unit Id: <HighlightS>{odr.unitId}</HighlightS></CardTxtItal>
             <CardTxtItal><HighlightS>{ odr.status }</HighlightS></CardTxtItal>
         </CardS>
     )
@@ -222,7 +223,7 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
                     {!activeOrders.length && <SubHeadTxtS>No Orders</SubHeadTxtS>}
                 </HeadS>
                 <CardsCtnS>
-                    {activeOrders.map(odr => 
+                    {activeOrders.map(odr =>
                         <OrderCards 
                             odr={ odr }
                             action={ () => onOrderPress(odr._id) }
