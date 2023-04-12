@@ -46,7 +46,7 @@ const CardS = styled.div`
     max-width: 350px;
     color: ${ colorList.a3};
     margin-bottom: 1em;
-    max-width: 200px;
+    max-width: 20.0px;
 `
 
 const CardNameS = styled.p`
