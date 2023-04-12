@@ -60,6 +60,17 @@ export interface CleanerI {
     preferred?: boolean
     minPriceServiceId: string | ServiceI
     minPrice: number
+    machines: MachineI[]
+}
+
+export interface MachineI {
+    type: 'dryer' | 'washer'
+    attachedOrder: string | null
+    attachedUnitId: string | null
+    lastUpdated: number,
+    size: 'small' | 'medium' | 'large'
+    status: 'Available' | 'In Use' | 'Out of Order'
+    machineId: string
 }
 
 export type OrderstatusT = "Task Posted Pickup" |
@@ -105,6 +116,7 @@ export type desiredService = {
 
 export interface OrderI {
     _id: string
+    unitId: string
     aptName: string
     building: string
     unit: string

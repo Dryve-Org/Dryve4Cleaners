@@ -5,12 +5,14 @@ import styled from 'styled-components'
 import { retreivActiveOrders } from '../../constants/request'
 import { useGlobalContext } from '../../context/global'
 import useMainErrHandler from '../../hook/MainErrorHook'
-import { OrderI } from '../../interface/api'
+import { CleanerI, OrderI } from '../../interface/api'
 import { colorList } from '../../styles/colors'
 import { device } from '../../styles/viewport'
+import MachineList from '../container/popups/MachineList'
 import { TokenAndClnOutletI } from '../TokenAndCln'
 
 const ActiveOrdersS = styled.section`
+    position: relative;
     overflow: auto;
     @media ${ device.desktop } {
         display: flex;
@@ -22,6 +24,24 @@ const ActiveOrdersS = styled.section`
         /* overflow: hidden; */
         /* box-shadow: inset 0px 0px 10px 1px ${ colorList.w3 }; */
     }
+`
+
+const WasherSvgCtnS = styled.button`
+    display: block;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    cursor: pointer;
+`
+
+export const WasherSvgS = styled.img.attrs({
+    src: '/images/washer.svg'
+})`
+    width: 40px;
+    height: 40px;
 `
 
 const HeadS = styled.div`
@@ -121,9 +141,10 @@ const OrderCards: React.FC<{odr: OrderI, action: Function}> = ({
 
     return(
         <CardS onClick={() => action()} status={ odr.status }>
-            <CardTtlS>{`${odr.client.firstName} ${ odr.client.lastName }` }</CardTtlS>
-            <CardTxtItal>Building: <HighlightS>{odr.building}</HighlightS></CardTxtItal>
-            <CardTxtItal>Unit: <HighlightS>{odr.unit}</HighlightS></CardTxtItal>
+            <CardTtlS>{`${ odr.client.firstName } ${ odr.client.lastName }` }</CardTtlS>
+            {/* <CardTxtItal>Building: <HighlightS>{odr.building}</HighlightS></CardTxtItal>
+            <CardTxtItal>Unit: <HighlightS>{odr.unit}</HighlightS></CardTxtItal> */}
+            <CardTxtItal>Unit Id: <HighlightS>{odr.unitId}</HighlightS></CardTxtItal>
             <CardTxtItal><HighlightS>{ odr.status }</HighlightS></CardTxtItal>
         </CardS>
     )
@@ -133,15 +154,18 @@ interface ActiveOrdersSideI {
     onOrderPress: (orderId: string) => void
     orderUpdate: boolean
     setOrderUpdate: React.Dispatch<React.SetStateAction<boolean>>
+    cleaner: CleanerI | undefined
 }
 
 const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
     onOrderPress,
     orderUpdate,
-    setOrderUpdate
+    setOrderUpdate,
+    cleaner
 }: ActiveOrdersSideI) => {
     const [ activeOrders, setActiveOrders ] = useState<OrderI[]>([])
     const [ loading, setLoading ] = useState<boolean>(true)
+    const [ machList, setMachList ] = useState<boolean>(false && cleaner)
     const { errorHandler } = useMainErrHandler()
 
     const {
@@ -184,20 +208,31 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
     }
 
     return(
-        <ActiveOrdersS>
-            <HeadS>
-                <HeadTxtS>Active Orders</HeadTxtS>
-                {!activeOrders.length && <SubHeadTxtS>No Orders</SubHeadTxtS>}
-            </HeadS>
-            <CardsCtnS>
-                {activeOrders.map(odr => 
-                    <OrderCards 
-                        odr={ odr }
-                        action={ () => onOrderPress(odr._id) }
-                    />
-                )}
-            </CardsCtnS>
-        </ActiveOrdersS>
+        <>
+            {cleaner && <MachineList
+                display={ machList }
+                close={ () => setMachList(false) }
+                machines={ cleaner?.machines }
+            />}
+            <ActiveOrdersS>
+                <WasherSvgCtnS onClick={ () => setMachList(!machList) }>
+                    <WasherSvgS />
+                </WasherSvgCtnS>
+                <HeadS>
+                    <HeadTxtS>Active Orders</HeadTxtS>
+                    {!activeOrders.length && <SubHeadTxtS>No Orders</SubHeadTxtS>}
+                </HeadS>
+                <CardsCtnS>
+                    {activeOrders.map(odr =>
+                        <OrderCards 
+                            odr={ odr }
+                            action={ () => onOrderPress(odr._id) }
+                            key={ odr._id }
+                        />
+                    )}
+                </CardsCtnS>
+            </ActiveOrdersS>
+        </>
     )
 }
 

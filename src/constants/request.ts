@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios'
-import { CleanerI, OrderI } from '../interface/api'
+import { CleanerI, MachineI, OrderI } from '../interface/api'
 
 /**
  * This function returns an axios instance with a baseURL and a header with an Authorization key and a
@@ -9,7 +9,6 @@ import { CleanerI, OrderI } from '../interface/api'
  * "Bearer null"
 */
 export const api = (providedToken?: string, errorHandler?: (e: any) => void ) => {
-    console.log('env', process.env)
     const theApi = axios.create({
         baseURL: process.env.REACT_APP_API_URL,
         headers: {
@@ -180,9 +179,51 @@ export const UpdateServices = async (
         return update
     } catch(e: any) {
         errorHandler && errorHandler(e)
-        return e.data
+        return e
     }
 }
+
+export const assignMachine = async (
+    token: string,
+    orderId: OrderI['_id'],
+    machineId: MachineI['machineId'],
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const update = await api(token, errorHandler)
+            .post<OrderI>(
+                `/cleanerPro/order/${orderId}/add_to_machine/${machineId}`,
+            )
+            .then(res => res.data)
+
+        return update
+    } catch(e: any) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+}
+
+export const unAssignedMachine = async (
+    token: string,
+    orderId: OrderI['_id'],
+    machineId: MachineI['machineId'],
+    errorHandler?: (e: any) => void
+) => {
+    try {
+        const update = await api(token, errorHandler)
+            .post<OrderI>(
+                `/cleanerPro/order/${orderId}/remove_from_machine/${machineId}`,
+            )
+            .then(res => res.data)
+
+        return update
+    } catch(e: any) {
+        errorHandler && errorHandler(e)
+        return undefined
+    }
+}
+
+
 
 export const clothesReady = async (
     token: string,

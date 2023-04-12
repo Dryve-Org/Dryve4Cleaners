@@ -11,7 +11,7 @@ const CardS = styled.div`
     padding: 10px;
     border-radius: 20px;
     text-align: center;
-    border: 2px solid ${ colors.offGold };
+    border: 2px solid ${ colorList.a3 };
     min-width: 250px;
     max-width: 350px;
     color: ${ colors.black };

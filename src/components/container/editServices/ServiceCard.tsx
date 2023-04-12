@@ -11,7 +11,7 @@ const CardS = styled.div`
     padding: 10px;
     border-radius: 20px;
     text-align: center;
-    border: 2px solid ${ colors.offGold };
+    border: 2px solid ${ colorList.a3 };
     min-width: 250px;
     max-width: 350px;
     color: ${ colors.black };
@@ -44,9 +44,10 @@ const CardAddBttn = styled.button`
     width: 40%;
     padding: 10px 10px;
     font-size: 20px;
-    background-color: ${ colors.black };
-    color: ${ colors.orange };
-    border: 3px solid ${ colors.orange };
+    font-weight: bolder;
+    background-color: ${ colorList.a3 };
+    color: ${ colorList.b1 };
+    border: 3px solid ${ colorList.b1 };
     cursor: pointer;
 `
 
@@ -56,9 +57,9 @@ const CardRemBttn = styled.button`
     width: 40%;
     padding: 10px 10px;
     font-size: 20px;
-    background-color: ${ colors.secondaryOffGold };
-    color: ${ colors.black };
-    border: 3px solid ${ colors.orange };
+    background-color: ${ colorList.b1 };
+    color: ${ colorList.e1 };
+    border: 3px solid ${ colorList.e1 };
     cursor: pointer;
 `
 
