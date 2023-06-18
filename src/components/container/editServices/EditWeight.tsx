@@ -69,7 +69,7 @@ const EditServiceCard = ({
     toggleWeightPop: toggleWeightPopParams
 }) => {
     const { 
-        title, 
+        name, 
         price, 
         description,
         _id
@@ -77,7 +77,7 @@ const EditServiceCard = ({
     return (
         <CardS onClick={ () => toggleWeightPop(service) }>
             <CardNameS>
-                { title }
+                { name }
             </CardNameS>
             <CardDescription>
                 { description }

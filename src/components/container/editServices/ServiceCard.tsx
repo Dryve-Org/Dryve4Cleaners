@@ -71,7 +71,7 @@ const ServiceCard = ({
     addSubSvc: EditServicesI['addSubSvc']
 }) => {
     const { 
-        title, 
+        name, 
         price, 
         description,
         _id
@@ -79,7 +79,7 @@ const ServiceCard = ({
     return (
         <CardS>
             <CardNameS>
-                { title }
+                { name }
             </CardNameS>
             <CardDescription>
                 { description }

@@ -545,8 +545,6 @@ const OrderDetails: React.FC<OrderDetailsI> = ({
             return
         }
 
-        console.table(dServices)
-
         UpdateServices(
             token,
             order._id,
