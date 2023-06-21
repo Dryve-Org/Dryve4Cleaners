@@ -69,16 +69,15 @@ const SvcCard = ({
     service,
     weight
 }: desiredService) => {
+    console.log('service', service)
 
     return (
         <CardS>
             <CardNameS>
-                { service.title }
+                { service.name }
             </CardNameS>
             <CardQuantity>
                 {
-                    service.perPound ?
-                    `Weight: ${ weight }` :
                     `Quantity: ${ quantity }`
                 }
             </CardQuantity>

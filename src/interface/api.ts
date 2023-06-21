@@ -36,9 +36,10 @@ export interface AddressI {
 export interface ServiceI {
     _id: string
     price: number
-    title: string
+    name: string
     description?: string
     perPound: boolean
+    productId: string
 }
 
 export type QuantityT = {

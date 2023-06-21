@@ -67,7 +67,7 @@ const GetWeightPop: React.FC<GetWeightPopI> = ({
             <PopBlockerS active={ display } />
             <PopWindowS active={ display }>
                 <HeaderCtnS active={ display }>
-                    <HeaderTxtS>{ service ? service.title : 'Input Clothes Weight' }</HeaderTxtS>
+                    <HeaderTxtS>{ service ? service.name : 'Input Clothes Weight' }</HeaderTxtS>
                     <SubHeaderTxtS>{ service ? service.description : '' }</SubHeaderTxtS>
                 </HeaderCtnS>
                 <BodyCtnS active={ display }>
