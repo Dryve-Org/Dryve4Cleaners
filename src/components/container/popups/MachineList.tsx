@@ -6,10 +6,12 @@ import { colorList } from "../../../styles/colors"
 import { ActivityI, BlockerS, ExitCntS, ExitSvgS, PopupI, WindowS } from './constants'
 
 
-const PopBlockerS = styled(BlockerS)``
+const PopBlockerS = styled(BlockerS)`
+`
 
 const PopWindowS = styled(WindowS)`
     display: ${({ active }) => active ? 'block' : 'none'};
+    overflow: auto;
 `
 
 const HeaderCtnS = styled.div<ActivityI>`
