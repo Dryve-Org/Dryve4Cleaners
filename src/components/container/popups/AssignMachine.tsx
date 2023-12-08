@@ -310,13 +310,22 @@ const AssignMachine: React.FC<AssignMachineI> = ({
     }
 
     const handleScan = (data: string): void => {
-        if(!isMachineId(data)) {
+        let { machineId, cleanerId } = JSON.parse(data)
+        console.log('data:', JSON.parse(data))
+        machineId = machineId.replace(/\s/g, '')
+        cleanerId = cleanerId.replace(/\s/g, '')
+        console.log('order.cleaner._id:', order.cleaner._id)
+
+
+        console.log('machineId:', machineId)
+        console.log('cleanerIdQR:', cleanerId)
+        if(!machineId || cleanerId !== order.cleaner._id) {
             alert('Machine not found')
             setQrReader(false)
         } else {
-            setMachineInput(data)
+            setMachineInput(machineId)
             setFilteredMachineList([
-                machineList.find(machine => machine.machineId === data) as MachineI
+                machineList.find(machine => machine.machineId === machineId) as MachineI
             ])
             setQrReader(false)
         }
