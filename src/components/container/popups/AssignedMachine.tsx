@@ -28,12 +28,12 @@ const HeaderUnitIdTxtS = styled(HeaderTxtS)`
 `
 
 const BodyCtnS = styled.div`
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 0 1em;
-    height: 100%;
+    max-height: 80%;
     
     @media ${ device.desktop} {
-        height: 300px;
+        max-height: 72%;
     }
 `
 
@@ -164,13 +164,28 @@ const AssignedMachines: React.FC<AssignedMachinesI> = ({
                     <HeaderUnitIdTxtS>{ order.unitId }</HeaderUnitIdTxtS>
                 </HeaderCtnS>
                 <BodyCtnS>
-                    { machines.map(machine => (
+                    { machines.map(machine => (<>
                         <MachineCard 
                             key={ machine.machineId } 
                             machine={ machine } 
                             onRemove={ onRemove }
                         />
-                    )) }
+                        <MachineCard 
+                            key={ machine.machineId } 
+                            machine={ machine } 
+                            onRemove={ onRemove }
+                        />
+                        <MachineCard 
+                            key={ machine.machineId } 
+                            machine={ machine } 
+                            onRemove={ onRemove }
+                        />
+                        <MachineCard 
+                            key={ machine.machineId } 
+                            machine={ machine } 
+                            onRemove={ onRemove }
+                        />
+                    </>)) }
                 </BodyCtnS>
             </PopWindowS>
         </>

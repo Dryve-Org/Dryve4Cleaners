@@ -10,7 +10,11 @@ const PopBlockerS = styled(BlockerS)``
 
 const PopWindowS = styled(WindowS)`
     display: ${({ active }) => active ? 'block' : 'none'};
-    overflow-y: sroll;
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+        width: 1px;
+    }
 
     @media ${ device.desktop } {
         height: 450px;
