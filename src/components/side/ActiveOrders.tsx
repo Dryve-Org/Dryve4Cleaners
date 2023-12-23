@@ -65,14 +65,18 @@ const CardsCtnS = styled.section`
     align-items: center;
     flex-direction: column;
     gap: 1em;
-    height: 100%;
+    height: calc(69vh - 200px);
     padding: 5px 0px;
     margin: 0 0%;
-    overflow: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     border-radius: 5px;
     @media ${ device.desktop } {
         padding: 0px 10px
+    }
+
+    @media ${ device.desktop } {
+        height: auto;
     }
 `
 
