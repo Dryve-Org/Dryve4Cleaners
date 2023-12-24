@@ -2,12 +2,13 @@ import throttle from '@jcoreio/async-throttle'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { api, getAttachedCleaners } from '../constants/request'
+import { getAttachedCleaners } from '../constants/request'
 import { useGlobalContext } from '../context/global'
 import useMainErrHandler from '../hook/MainErrorHook'
 import { CleanerI } from '../interface/api'
 import { Token } from '../interface/general'
-import { colors, colorList } from '../styles/colors'
+import { colorList } from '../styles/colors'
+import { device } from '../styles/viewport'
 
 const ChooseClnS = styled.section`
 `
@@ -17,7 +18,7 @@ const ChooseClnContainerS = styled.main`
 `
 
 const HeaderCtnS = styled.div`
-    margin: 50px 0px;
+    margin: 2vh 0px;
 `
 
 const Header = styled.h2`
@@ -31,14 +32,25 @@ const CardsCtnS = styled.section`
     flex-direction: column;
     align-items: center;
     gap: 1em;
-    margin: 0 10%;
+    height: 50vh;
+    overflow-y: auto;
+
+    @media ${ device.desktop } {
+        height: 600px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 0 10vw;
+        height: auto;
+        max-height: 50vh;
+        justify-content: space-evenly;
+    }
 `
 
 const CardS = styled.div`
     width: 100%;
     background-color: whitesmoke;
     border-radius: 20px;
-    max-width: 500px;
+    width: 350px;
     text-align: center;
     font-weight: 500;
     padding: 15px 0;
@@ -142,10 +154,12 @@ const ChooseCln: React.FC<{
                     <Header>Choose Cleaner</Header>
                 </HeaderCtnS>
                 <CardsCtnS>
-                    {cleaners.map(cln => <ClnCard 
-                        cln={ cln } 
-                        action={ () => selectCln(cln._id) }
-                    />)}  
+                    {cleaners.map(cln =>
+                        <ClnCard 
+                            cln={ cln } 
+                            action={ () => selectCln(cln._id) }
+                        />
+                    )}  
                 </CardsCtnS>
             </ChooseClnContainerS>
         </ChooseClnS>

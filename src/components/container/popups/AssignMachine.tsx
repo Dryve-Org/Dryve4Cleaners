@@ -10,6 +10,11 @@ const PopBlockerS = styled(BlockerS)``
 
 const PopWindowS = styled(WindowS)`
     display: ${({ active }) => active ? 'block' : 'none'};
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+        width: 1px;
+    }
 
     @media ${ device.desktop } {
         height: 450px;
@@ -37,8 +42,9 @@ const BodyCtnS = styled.div`
     margin: 0 1em;
     display: flex;
     flex-direction: column;
-    height: max-content;
+    // height: max-content;
     gap: 1em;
+    overflow-y: auto;
 
     @media ${ device.desktop } {
         position: relative;
@@ -147,14 +153,19 @@ const MichineSelectCtnS = styled.div`
 `
 
 const IdSelectCtnS = styled.div`
-    width: 100%;
-    min-height: 320px;
-    max-height: 320px;
+    border: 4px solid black;
+    border-radius: 5px;
     display: grid;
+    height: 10rem;
+    padding: 5px 1px;
     grid-template-columns: 1fr 1fr 1fr;
     /* justify-content: space-around; */
     gap: 1em;
-    overflow-x: auto;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 1px;
+    }
 
     @media ${ device.desktop } {
         grid-column-start: 1;
