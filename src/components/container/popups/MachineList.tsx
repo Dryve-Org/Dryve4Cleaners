@@ -4,6 +4,7 @@ import { unixToDate } from "../../../constants/time"
 import { MachineI } from "../../../interface/api"
 import { colorList } from "../../../styles/colors"
 import { ActivityI, BlockerS, ExitCntS, ExitSvgS, PopupI, WindowS } from './constants'
+import { device } from "../../../styles/viewport"
 
 
 const PopBlockerS = styled(BlockerS)`
@@ -11,7 +12,6 @@ const PopBlockerS = styled(BlockerS)`
 
 const PopWindowS = styled(WindowS)`
     display: ${({ active }) => active ? 'block' : 'none'};
-    overflow: auto;
 `
 
 const HeaderCtnS = styled.div<ActivityI>`
@@ -29,6 +29,11 @@ const BodyCtnS = styled.div`
     gap: 1em;
     justify-content: space-around;
     margin: 0 1em;
+
+    @media ${ device.desktop } {
+        overflow-y: auto;
+        height: 80%;
+    }
 `
 
 const MachineCardS = styled.button<{ status: MachineI['status'] }>`

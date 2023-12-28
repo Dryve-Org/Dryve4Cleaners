@@ -125,6 +125,7 @@ export interface OrderI {
         firstName: string
         lastName: string
         phoneNumber: string   
+        email: string
     }// client
     origin?: string // client pickup and dropoff
     dropOffAddress?: string

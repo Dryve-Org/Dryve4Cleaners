@@ -325,7 +325,6 @@ const AssignMachine: React.FC<AssignMachineI> = ({
         console.log('data:', JSON.parse(data))
         machineId = machineId.replace(/\s/g, '')
         cleanerId = cleanerId.replace(/\s/g, '')
-        console.log('order.cleaner._id:', order.cleaner._id)
 
 
         console.log('machineId:', machineId)
