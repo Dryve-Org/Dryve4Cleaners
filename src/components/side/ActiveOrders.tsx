@@ -3,13 +3,13 @@ import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { retreivActiveOrders } from '../../constants/request'
-import { useGlobalContext } from '../../context/global'
 import useMainErrHandler from '../../hook/MainErrorHook'
 import { CleanerI, OrderI } from '../../interface/api'
 import { colorList } from '../../styles/colors'
 import { device } from '../../styles/viewport'
 import MachineList from '../container/popups/MachineList'
 import { TokenAndClnOutletI } from '../TokenAndCln'
+import BagScanPop from '../container/popups/bagscan'
 
 const ActiveOrdersS = styled.section`
     position: relative;
@@ -37,8 +37,26 @@ const WasherSvgCtnS = styled.button`
     cursor: pointer;
 `
 
+const BagScanSvgCtnS = styled.button`
+    display: block;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    cursor: pointer;
+`
+
 export const WasherSvgS = styled.img.attrs({
     src: '/images/washer.svg'
+})`
+    width: 40px;
+    height: 40px;
+`
+
+export const BagScanSvgS = styled.img.attrs({
+    src: '/images/qr-code.svg'
 })`
     width: 40px;
     height: 40px;
@@ -170,6 +188,7 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
     const [ activeOrders, setActiveOrders ] = useState<OrderI[]>([])
     const [ loading, setLoading ] = useState<boolean>(true)
     const [ machList, setMachList ] = useState<boolean>(false && cleaner)
+    const [ bagScan, setBagScan ] = useState<boolean>(false)
     const { errorHandler } = useMainErrHandler()
 
     const {
@@ -211,6 +230,11 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
         )
     }
 
+    const onBagScan = (orderId: string) => {
+        onOrderPress(orderId)
+        setBagScan(false)
+    }
+
     return(
         <>
             {cleaner && <MachineList
@@ -218,10 +242,20 @@ const ActiveOrdersSide: React.FC<ActiveOrdersSideI> = ({
                 close={ () => setMachList(false) }
                 machines={ cleaner?.machines }
             />}
+            {bagScan && <BagScanPop 
+                activeOrders={activeOrders}
+                display={ bagScan }
+                close={ () => setBagScan(false) }
+                loading={ loading }
+                handleAction={ (orderId: string) => onBagScan(orderId)}
+            />}
             <ActiveOrdersS>
                 <WasherSvgCtnS onClick={ () => setMachList(!machList) }>
                     <WasherSvgS />
                 </WasherSvgCtnS>
+                <BagScanSvgCtnS onClick={ () => setBagScan(!bagScan)}>
+                    <BagScanSvgS />
+                </BagScanSvgCtnS>
                 <HeadS>
                     <HeadTxtS>Active Orders</HeadTxtS>
                     {!activeOrders.length && <SubHeadTxtS>No Orders</SubHeadTxtS>}
