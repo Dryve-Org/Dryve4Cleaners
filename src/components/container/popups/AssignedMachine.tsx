@@ -30,10 +30,10 @@ const HeaderUnitIdTxtS = styled(HeaderTxtS)`
 const BodyCtnS = styled.div`
     overflow-y: auto;
     padding: 0 1em;
-    height: 100%;
+    max-height: 80%;
     
     @media ${ device.desktop} {
-        height: 300px;
+        max-height: 72%;
     }
 `
 
